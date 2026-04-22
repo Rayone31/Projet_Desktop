@@ -1,135 +1,215 @@
-# User Stories
+# User Stories - Projet Soundboard
 
-## US-01
-- **En tant que** utilisateur  
-- **Je veux** appuyer sur un bouton  
-- **Afin de** lancer une soundboard  
-- **Priorité : Must**
+## Feature 1 - Lecture de sons
 
----
+### User Story 1.1 - Jouer un son
+En tant qu'utilisateur,
+Je veux declencher un son via un bouton,
+Afin de jouer un extrait audio.
 
-## US-02
-- **En tant que** utilisateur  
-- **Je veux** pouvoir glisser-déposer des fichiers audio dans l’application  
-- **Afin de** ajouter mes propres sons dans une soundboard  
-- **Priorité : Must**
+Priorite : Must
 
----
+Criteres d'acceptation :
+- Given une soundboard contenant des sons
+- When je clique sur un bouton de son
+- Then le son associe est joue immediatement
 
-## US-03
-- **En tant que** utilisateur  
-- **Je veux** pouvoir découper et modifier mes fichiers audio  
-- **Afin de** sélectionner uniquement le passage voulu  
-- **Priorité : Must**
+### User Story 1.2 - Lancer une soundboard
+En tant qu'utilisateur,
+Je veux acceder a une soundboard,
+Afin d'utiliser ses sons.
 
----
+Priorite : Must
 
-## US-04
-- **En tant que** utilisateur  
-- **Je veux** lancer une soundboard  
-- **Afin de** écouter les sons qu’elle contient  
-- **Priorité : Must**
+Criteres d'acceptation :
+- Given plusieurs soundboards configurees
+- When je selectionne une soundboard
+- Then la soundboard selectionnee est ouverte et ses sons sont utilisables
 
----
+### User Story 1.3 - Raccourcis clavier
+En tant qu'utilisateur,
+Je veux assigner une touche a un son,
+Afin de le declencher rapidement.
 
-## US-05
-- **En tant que** utilisateur  
-- **Je veux** assigner une touche clavier à une soundboard ou un son  
-- **Afin de** les déclencher rapidement  
-- **Priorité : Must**
+Priorite : Must
 
----
+Criteres d'acceptation :
+- Given un son configure avec une touche
+- When j'appuie sur la touche assignee
+- Then le son associe est joue
 
-## US-06
-- **En tant que** utilisateur  
-- **Je veux** créer plusieurs soundboards  
-- **Afin de** avoir différents ensembles de sons  
-- **Priorité : Should**
+### User Story 1.4 - Sortie audio systeme
+En tant qu'utilisateur,
+Je veux que les sons passent par mon micro virtuel,
+Afin de les partager sur Discord et en jeu.
 
----
+Priorite : Must
 
-## US-07
-- **En tant que** utilisateur  
-- **Je veux** une interface avec un fond graphique agréable  
-- **Afin de** rendre l’application plus confortable à utiliser  
-- **Priorité : Should**
+Criteres d'acceptation :
+- Given un micro virtuel selectionne comme sortie
+- When je joue un son
+- Then le son est emis sur la sortie audio virtuelle
 
----
+## Feature 2 - Gestion des fichiers audio
 
-## US-08
-- **En tant que** utilisateur  
-- **Je veux** une application avec un minimum de fenêtres (1 ou 2 maximum)  
-- **Afin de** simplifier l’utilisation  
-- **Priorité : Should**
+### User Story 2.1 - Import de fichiers
+En tant qu'utilisateur,
+Je veux glisser-deposer des fichiers audio,
+Afin de les ajouter a ma soundboard.
 
----
+Priorite : Must
 
-## US-09
-- **En tant que** utilisateur  
-- **Je veux** voir la forme d’onde du son avec la partie sélectionnée et la partie restante  
-- **Afin de** visualiser clairement mon découpage audio  
-- **Priorité : Must**
+Criteres d'acceptation :
+- Given l'interface de la soundboard est ouverte
+- When je glisse-depose un ou plusieurs fichiers audio
+- Then les fichiers sont importes et apparaissent dans la soundboard
 
----
+### User Story 2.2 - Formats supportes
+En tant qu'utilisateur,
+Je veux importer plusieurs formats audio,
+Afin d'utiliser differents types de fichiers.
 
-## US-10
-- **En tant que** utilisateur  
-- **Je veux** définir un point de début et de fin sur la forme d’onde  
-- **Afin de** découper facilement l’audio  
-- **Priorité : Must**
+Priorite : Should
 
----
+Criteres d'acceptation :
+- Given des fichiers audio de formats differents
+- When je les importe dans l'application
+- Then les formats supportes sont acceptes et utilisables
 
-## US-11
-- **En tant que** utilisateur  
-- **Je veux** un bouton pour écouter l’extrait audio sélectionné  
-- **Afin de** tester le son avant utilisation  
-- **Priorité : Must**
+## Feature 3 - Edition audio
 
----
+### User Story 3.1 - Visualisation waveform
+En tant qu'utilisateur,
+Je veux voir la forme d'onde,
+Afin de comprendre le son.
 
-## US-12
-- **En tant que** utilisateur  
-- **Je veux** pouvoir renommer mes soundboards  
-- **Afin de** mieux les organiser  
-- **Priorité : Should**
+Priorite : Must
 
----
+Criteres d'acceptation :
+- Given un fichier audio charge
+- When j'ouvre l'editeur audio
+- Then la forme d'onde du fichier est affichee
 
-## US-13
-- **En tant que** utilisateur  
-- **Je veux** choisir entre une fenêtre simple ou le plein écran  
-- **Afin de** adapter l’affichage à mon usage  
-- **Priorité : Should**
+### User Story 3.2 - Selection audio
+En tant qu'utilisateur,
+Je veux definir un debut et une fin,
+Afin de decouper un extrait.
 
----
+Priorite : Must
 
-## US-14
-- **En tant que** utilisateur  
-- **Je veux** importer plusieurs formats de fichiers audio  
-- **Afin de** utiliser différents types de sons  
-- **Priorité : Should**
+Criteres d'acceptation :
+- Given un fichier audio charge dans l'editeur
+- When je positionne un point de debut et un point de fin
+- Then la plage selectionnee est clairement visible
 
----
+### User Story 3.3 - Pre-ecoute
+En tant qu'utilisateur,
+Je veux ecouter l'extrait selectionne,
+Afin de valider mon decoupage.
 
-## US-15
-- **En tant que** utilisateur  
-- **Je veux** choisir quelles soundboards apparaissent dans le menu principal  
-- **Afin de** n’afficher que celles que j’utilise  
-- **Priorité : Should**
+Priorite : Must
 
----
+Criteres d'acceptation :
+- Given une plage audio selectionnee
+- When je lance la pre-ecoute
+- Then seule la plage selectionnee est lue
 
-## US-16
-- **En tant que** utilisateur  
-- **Je veux** conserver mes anciennes soundboards même si elles ne sont plus affichées  
-- **Afin de** pouvoir les réutiliser ultérieurement  
-- **Priorité : Should**
+### User Story 3.4 - Decoupage audio
+En tant qu'utilisateur,
+Je veux modifier un fichier audio,
+Afin de ne garder que la partie utile.
 
----
+Priorite : Must
 
-## US-17
-- **En tant que** utilisateur  
-- **Je veux** que la soundboard soit connectée à mon entrée audio système  
-- **Afin de** que les autres puissent l’entendre en vocal (Discord, jeux, etc.)  
-- **Priorité : Must**
+Criteres d'acceptation :
+- Given une selection audio valide
+- When je confirme le decoupage
+- Then le fichier est tronque a la plage selectionnee
+
+## Feature 4 - Gestion des soundboards
+
+### User Story 4.1 - Creer une soundboard
+En tant qu'utilisateur,
+Je veux creer plusieurs soundboards,
+Afin d'organiser mes sons.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given l'ecran de gestion des soundboards
+- When je cree une nouvelle soundboard
+- Then elle est ajoutee a la liste des soundboards
+
+### User Story 4.2 - Renommer une soundboard
+En tant qu'utilisateur,
+Je veux renommer une soundboard,
+Afin de mieux m'organiser.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given une soundboard existante
+- When je modifie son nom
+- Then le nouveau nom est enregistre et affiche
+
+### User Story 4.3 - Visibilite dans le menu
+En tant qu'utilisateur,
+Je veux choisir quelles soundboards sont visibles,
+Afin de simplifier l'interface.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given plusieurs soundboards disponibles
+- When je masque une soundboard
+- Then elle n'apparait plus dans le menu principal
+
+### User Story 4.4 - Conservation des soundboards
+En tant qu'utilisateur,
+Je veux garder mes anciennes soundboards,
+Afin de les reutiliser plus tard.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given des soundboards existantes
+- When je ferme puis relance l'application
+- Then mes soundboards precedentes sont conservees
+
+## Feature 5 - Interface utilisateur
+
+### User Story 5.1 - Interface simple
+En tant qu'utilisateur,
+Je veux une application avec peu de fenetres,
+Afin de faciliter l'usage.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given l'application est lancee
+- When je navigue entre les principales fonctions
+- Then les actions essentielles sont accessibles sans multiplication de fenetres
+
+### User Story 5.2 - Mode d'affichage
+En tant qu'utilisateur,
+Je veux choisir entre fenetre et plein ecran,
+Afin d'adapter l'affichage.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given l'application est ouverte
+- When je change le mode d'affichage
+- Then l'interface bascule correctement entre fenetre et plein ecran
+
+### User Story 5.3 - Design
+En tant qu'utilisateur,
+Je veux une interface agreable,
+Afin d'ameliorer le confort d'utilisation.
+
+Priorite : Should
+
+Criteres d'acceptation :
+- Given l'utilisateur utilise l'application
+- When il interagit avec l'interface
+- Then l'interface reste lisible, coherente et intuitive
