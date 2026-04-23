@@ -10,7 +10,7 @@ namespace DMsound.Session.Infrastructure.Network;
 public sealed class SessionHostWebSocketServer : IDisposable
 {
     private const string LanPrefixHost = "+";
-    private const string LocalPrefixHost = "localhost";
+    private const string LocalPrefixHost = "127.0.0.1";
 
     private readonly CreateSessionUseCase createSessionUseCase;
     private readonly HttpListener listener;

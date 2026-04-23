@@ -57,8 +57,9 @@ public partial class MainWindow : Window
             hostServer = new SessionHostWebSocketServer(port, createUseCase, joinUseCase, allowLan);
             _ = hostServer.RunAsync(hostCancellationSource.Token);
 
-            hostClientWebSocket = new ClientWebSocket();
-            await ConnectWithRetryAsync(hostClientWebSocket, $"ws://localhost:{port}/session/", hostCancellationSource.Token);
+            hostClientWebSocket = await CreateConnectedSocketWithRetryAsync(
+                $"ws://127.0.0.1:{port}/session/",
+                hostCancellationSource.Token);
 
             var hostId = Guid.NewGuid().ToString();
             await SendAsync(
@@ -255,22 +256,38 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task ConnectWithRetryAsync(ClientWebSocket socket, string url, CancellationToken cancellationToken)
+    private static async Task<ClientWebSocket> CreateConnectedSocketWithRetryAsync(
+        string url,
+        CancellationToken cancellationToken)
     {
         const int maxAttempts = 10;
+        Exception? lastError = null;
 
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
+            var socket = new ClientWebSocket();
+
             try
             {
                 await socket.ConnectAsync(new Uri(url), cancellationToken);
-                return;
+                return socket;
             }
-            catch when (attempt < maxAttempts)
+            catch (Exception exception) when (attempt < maxAttempts)
             {
+                lastError = exception;
+                socket.Dispose();
                 await Task.Delay(100, cancellationToken);
             }
+
+            if (socket.State != WebSocketState.Open)
+            {
+                socket.Dispose();
+            }
         }
+
+        throw new InvalidOperationException(
+            "Connexion WebSocket impossible apres plusieurs tentatives.",
+            lastError);
     }
 
     private static async Task SendAsync<T>(
