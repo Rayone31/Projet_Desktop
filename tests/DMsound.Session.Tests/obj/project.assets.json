@@ -393,6 +393,43 @@
         "build": {
           "build/net8.0/xunit.runner.visualstudio.props": {}
         }
+      },
+      "DMsound.Session.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "DMsound.Session.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DMsound.Session.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMsound.Session.Application.dll": {}
+        }
+      },
+      "DMsound.Session.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/DMsound.Session.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMsound.Session.Domain.dll": {}
+        }
+      },
+      "DMsound.Session.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "DMsound.Session.Application": "1.0.0",
+          "DMsound.Session.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DMsound.Session.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMsound.Session.Infrastructure.dll": {}
+        }
       }
     }
   },
@@ -903,10 +940,28 @@
         "xunit.runner.visualstudio.3.1.4.nupkg.sha512",
         "xunit.runner.visualstudio.nuspec"
       ]
+    },
+    "DMsound.Session.Application/1.0.0": {
+      "type": "project",
+      "path": "../../src/DMsound.Session.Application/DMsound.Session.Application.csproj",
+      "msbuildProject": "../../src/DMsound.Session.Application/DMsound.Session.Application.csproj"
+    },
+    "DMsound.Session.Domain/1.0.0": {
+      "type": "project",
+      "path": "../../src/DMsound.Session.Domain/DMsound.Session.Domain.csproj",
+      "msbuildProject": "../../src/DMsound.Session.Domain/DMsound.Session.Domain.csproj"
+    },
+    "DMsound.Session.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../../src/DMsound.Session.Infrastructure/DMsound.Session.Infrastructure.csproj",
+      "msbuildProject": "../../src/DMsound.Session.Infrastructure/DMsound.Session.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "DMsound.Session.Application >= 1.0.0",
+      "DMsound.Session.Domain >= 1.0.0",
+      "DMsound.Session.Infrastructure >= 1.0.0",
       "Microsoft.NET.Test.Sdk >= 17.14.1",
       "coverlet.collector >= 6.0.4",
       "xunit >= 2.9.3",
@@ -937,7 +992,17 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj": {
+              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj"
+            },
+            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj": {
+              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj"
+            },
+            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\DMsound.Session.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\DMsound.Session.Infrastructure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

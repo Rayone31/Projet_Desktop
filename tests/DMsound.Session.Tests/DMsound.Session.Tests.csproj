@@ -18,4 +18,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DMsound.Session.Application\DMsound.Session.Application.csproj" />
+    <ProjectReference Include="..\..\src\DMsound.Session.Domain\DMsound.Session.Domain.csproj" />
+    <ProjectReference Include="..\..\src\DMsound.Session.Infrastructure\DMsound.Session.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

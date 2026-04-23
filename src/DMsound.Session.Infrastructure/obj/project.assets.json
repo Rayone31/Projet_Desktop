@@ -1,11 +1,49 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "DMsound.Session.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "DMsound.Session.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DMsound.Session.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMsound.Session.Application.dll": {}
+        }
+      },
+      "DMsound.Session.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/DMsound.Session.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMsound.Session.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "DMsound.Session.Application/1.0.0": {
+      "type": "project",
+      "path": "../DMsound.Session.Application/DMsound.Session.Application.csproj",
+      "msbuildProject": "../DMsound.Session.Application/DMsound.Session.Application.csproj"
+    },
+    "DMsound.Session.Domain/1.0.0": {
+      "type": "project",
+      "path": "../DMsound.Session.Domain/DMsound.Session.Domain.csproj",
+      "msbuildProject": "../DMsound.Session.Domain/DMsound.Session.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "DMsound.Session.Application >= 1.0.0",
+      "DMsound.Session.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\maell\\.nuget\\packages\\": {}
@@ -31,7 +69,14 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj": {
+              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj"
+            },
+            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj": {
+              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

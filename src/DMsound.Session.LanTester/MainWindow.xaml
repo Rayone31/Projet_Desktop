@@ -1,0 +1,142 @@
+<Window x:Class="DMsound.Session.LanTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DMsound LAN Tester" Height="640" Width="920"
+        MinHeight="640" MinWidth="900">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Test Session LAN - Host / Join"
+                   FontSize="24"
+                   FontWeight="SemiBold" />
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Grid.Column="0" Header="Host Session" Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Nom host" />
+                    <TextBox x:Name="HostNameTextBox" Grid.Row="0" Grid.Column="2" Text="Host" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Text="Port" />
+                    <TextBox x:Name="HostPortTextBox" Grid.Row="2" Grid.Column="2" Text="5005" />
+
+                    <CheckBox x:Name="AllowLanCheckBox"
+                              Grid.Row="4"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="3"
+                              Content="Autoriser connexions LAN (autres appareils)"
+                              IsChecked="True" />
+
+                    <Button x:Name="HostSessionButton"
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Height="34"
+                            Click="HostSessionButton_OnClick"
+                            Content="Creer session" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" VerticalAlignment="Center" Text="Code session" />
+                    <TextBox x:Name="HostSessionCodeTextBox"
+                             Grid.Row="8"
+                             Grid.Column="2"
+                             IsReadOnly="True"
+                             FontSize="20"
+                             FontWeight="SemiBold" />
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" VerticalAlignment="Center" Text="IP host" />
+                    <TextBox x:Name="HostIpTextBox"
+                             Grid.Row="10"
+                             Grid.Column="2"
+                             IsReadOnly="True" />
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Column="2" Header="Join Session" Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Nom client" />
+                    <TextBox x:Name="JoinNameTextBox" Grid.Row="0" Grid.Column="2" Text="Client" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Text="IP host" />
+                    <TextBox x:Name="JoinHostIpTextBox" Grid.Row="2" Grid.Column="2" Text="127.0.0.1" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Text="Port" />
+                    <TextBox x:Name="JoinHostPortTextBox" Grid.Row="4" Grid.Column="2" Text="5005" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" Text="Code session" />
+                    <TextBox x:Name="JoinSessionCodeTextBox" Grid.Row="6" Grid.Column="2" />
+
+                    <Button x:Name="JoinSessionButton"
+                            Grid.Row="8"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Height="34"
+                            Click="JoinSessionButton_OnClick"
+                            Content="Rejoindre session" />
+
+                    <TextBlock x:Name="JoinStatusTextBlock"
+                               Grid.Row="10"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="3"
+                               Text="Statut: en attente"
+                               FontWeight="SemiBold" />
+                </Grid>
+            </GroupBox>
+        </Grid>
+
+        <GroupBox Grid.Row="4" Header="Logs" Padding="8">
+            <ListBox x:Name="LogsListBox" />
+        </GroupBox>
+    </Grid>
+</Window>

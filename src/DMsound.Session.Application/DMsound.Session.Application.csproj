@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DMsound.Session.Domain\DMsound.Session.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,7 @@
+<Solution>
+	<Project Path="src/DMsound.Session.Domain/DMsound.Session.Domain.csproj" />
+	<Project Path="src/DMsound.Session.Application/DMsound.Session.Application.csproj" />
+	<Project Path="src/DMsound.Session.Infrastructure/DMsound.Session.Infrastructure.csproj" />
+	<Project Path="src/DMsound.Session.LanTester/DMsound.Session.LanTester.csproj" />
+	<Project Path="tests/DMsound.Session.Tests/DMsound.Session.Tests.csproj" />
+</Solution>
