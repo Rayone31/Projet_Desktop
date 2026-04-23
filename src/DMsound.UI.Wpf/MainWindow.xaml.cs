@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 using DMsound.UI.Wpf.Infrastructure;
 
 namespace DMsound.UI.Wpf;
@@ -29,5 +30,37 @@ public partial class MainWindow : Window
     private void OnWindowKeyDown(object sender, KeyEventArgs e)
     {
         _viewModel.HandleKeyPress(e.Key.ToString());
+    }
+
+    private void OnWindowDrop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            return;
+        }
+
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] filePaths || filePaths.Length == 0)
+        {
+            return;
+        }
+
+        _viewModel.ImportAudioFiles(filePaths);
+    }
+
+    private void OnImportAudioClicked(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Importer des fichiers audio",
+            Multiselect = true,
+            Filter = "Fichiers audio|*.mp3;*.wav;*.wma;*.aac;*.flac;*.m4a;*.aiff|Tous les fichiers|*.*",
+        };
+
+        if (dialog.ShowDialog(this) != true)
+        {
+            return;
+        }
+
+        _viewModel.ImportAudioFiles(dialog.FileNames);
     }
 }

@@ -14,7 +14,7 @@ internal sealed class DemoSoundboardRepository : ISoundboardRepository
     public static DemoSoundboardRepository Create()
     {
         var repository = new DemoSoundboardRepository();
-        repository.Seed();
+        repository.Load();
         return repository;
     }
 
@@ -38,14 +38,37 @@ internal sealed class DemoSoundboardRepository : ISoundboardRepository
         return _soundboards.Any(item => string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 
-    private void Seed()
+    private void Load()
     {
-        var audioFolder = DemoSoundAssetFactory.EnsureDemoAudioFolder();
+        DemoSoundAssetFactory.EnsureAudioOriginalsFolder();
+        DemoSoundAssetFactory.EnsureAudioTrimmedFolder();
 
+        // Créer la soundboard Gaming avec les sons
         var gaming = new Soundboard(SoundboardId.New(), "Gaming");
-        gaming.AddSound(new Sound(SoundId.New(), "sncf", DemoSoundAssetFactory.GetDemoMp3Path(audioFolder, "sncf.mp3"), new Hotkey("A")));
-        gaming.AddSound(new Sound(SoundId.New(), "fah", DemoSoundAssetFactory.GetDemoMp3Path(audioFolder, "fah.mp3"), new Hotkey("S")));
-        gaming.AddSound(new Sound(SoundId.New(), "discord-notif", DemoSoundAssetFactory.GetDemoMp3Path(audioFolder, "discord-notif.mp3"), new Hotkey("D")));
+
+        // Charger chaque son original et vérifier s'il y a une version trimmed
+        var sounds = new[]
+        {
+            ("sncf.mp3", "sncf", "A"),
+            ("fah.mp3", "fah", "S"),
+            ("discord-notif.mp3", "discord-notif", "D")
+        };
+
+        foreach (var (fileName, soundName, hotkeyChar) in sounds)
+        {
+            var originalPath = DemoSoundAssetFactory.TryGetOriginalAudioPath(fileName);
+
+            if (originalPath is null)
+            {
+                continue;
+            }
+
+            var trimmedPath = DemoSoundAssetFactory.GetTrimmedAudioPath(fileName);
+
+            var filePath = trimmedPath ?? originalPath;
+
+            gaming.AddSound(new Sound(SoundId.New(), soundName, filePath, new Hotkey(hotkeyChar)));
+        }
 
         _soundboards.Add(gaming);
     }

@@ -6,6 +6,7 @@ public sealed class Sound
     {
         Id = id;
         Name = ValidateText(name, nameof(name));
+        OriginalFilePath = ValidateText(filePath, nameof(filePath));
         FilePath = ValidateText(filePath, nameof(filePath));
         Hotkey = hotkey;
     }
@@ -14,7 +15,9 @@ public sealed class Sound
 
     public string Name { get; private set; }
 
-    public string FilePath { get; }
+    public string OriginalFilePath { get; }
+
+    public string FilePath { get; private set; }
 
     public Hotkey? Hotkey { get; private set; }
 
@@ -31,6 +34,16 @@ public sealed class Sound
     public void ClearHotkey()
     {
         Hotkey = null;
+    }
+
+    public void UpdateFilePath(string filePath)
+    {
+        FilePath = ValidateText(filePath, nameof(filePath));
+    }
+
+    public void RestoreOriginalFilePath()
+    {
+        FilePath = OriginalFilePath;
     }
 
     private static string ValidateText(string value, string parameterName)

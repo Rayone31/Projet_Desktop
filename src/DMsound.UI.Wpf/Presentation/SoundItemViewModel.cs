@@ -7,13 +7,20 @@ internal sealed class SoundItemViewModel : ObservableObject
 {
     private string _hotkeyDraft;
 
-    public SoundItemViewModel(SoundId id, string name, string? hotkey, ICommand playCommand, ICommand assignHotkeyCommand)
+    public SoundItemViewModel(
+        SoundId id,
+        string name,
+        string? hotkey,
+        ICommand playCommand,
+        ICommand assignHotkeyCommand,
+        ICommand selectCommand)
     {
         Id = id;
         Name = name;
         Hotkey = hotkey;
         PlayCommand = playCommand;
         AssignHotkeyCommand = assignHotkeyCommand;
+        SelectCommand = selectCommand;
         _hotkeyDraft = hotkey ?? string.Empty;
     }
 
@@ -32,6 +39,8 @@ internal sealed class SoundItemViewModel : ObservableObject
     public ICommand PlayCommand { get; }
 
     public ICommand AssignHotkeyCommand { get; }
+
+    public ICommand SelectCommand { get; }
 
     public void UpdateHotkey(string? hotkey)
     {
