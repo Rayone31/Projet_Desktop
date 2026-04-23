@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
@@ -21,9 +22,8 @@ public partial class MainWindow : Window
     };
 
     private CancellationTokenSource? hostCancellationSource;
-    private ClientWebSocket? hostClientWebSocket;
-    private Task? hostListenTask;
     private SessionHostWebSocketServer? hostServer;
+    private Task? hostServerRunTask;
     private ClientWebSocket? joinClientWebSocket;
     private Task? joinListenTask;
 
@@ -52,47 +52,30 @@ public partial class MainWindow : Window
             var createUseCase = new CreateSessionUseCase(new DefaultSessionCodeGenerator(), repository);
             var joinUseCase = new JoinSessionByCodeUseCase(repository);
             var allowLan = AllowLanCheckBox.IsChecked == true;
+            var resolvedHostName = string.IsNullOrWhiteSpace(hostName) ? "Host" : hostName;
+            Log($"Host init. Name={resolvedHostName}; Port={port}; LAN={allowLan}; LocalIPs={string.Join(",", GetLocalIPv4Addresses())}");
 
             hostCancellationSource = new CancellationTokenSource();
             hostServer = new SessionHostWebSocketServer(port, createUseCase, joinUseCase, allowLan);
-            _ = hostServer.RunAsync(hostCancellationSource.Token);
+            hostServer.MemberJoined += OnHostMemberJoined;
+            Log($"HttpListener prefixes: {string.Join(" | ", hostServer.GetConfiguredPrefixes())}");
+            await hostServer.StartAsync(hostCancellationSource.Token);
+            hostServerRunTask = hostServer.RunAsync(hostCancellationSource.Token);
 
-            hostClientWebSocket = await CreateConnectedSocketWithRetryAsync(
-                $"ws://127.0.0.1:{port}/session/",
-                hostCancellationSource.Token);
+            var hostUserId = UserId.From(Guid.NewGuid());
+            var hostResponse = await createUseCase.ExecuteAsync(hostUserId, resolvedHostName, hostCancellationSource.Token);
 
-            var hostId = Guid.NewGuid().ToString();
-            await SendAsync(
-                hostClientWebSocket,
-                SessionWebSocketMessageTypes.HostSession,
-                new HostSessionRequest(hostId, string.IsNullOrWhiteSpace(hostName) ? "Host" : hostName),
-                hostCancellationSource.Token);
-
-            var rawResponse = await ReceiveAsync(hostClientWebSocket, hostCancellationSource.Token);
-            var envelope = JsonSerializer.Deserialize<SessionWebSocketEnvelope>(rawResponse, jsonOptions)
-                ?? throw new InvalidOperationException("Reponse host invalide.");
-
-            if (envelope.Type != SessionWebSocketMessageTypes.HostSessionAccepted)
-            {
-                var error = envelope.Payload.Deserialize<SessionErrorResponse>(jsonOptions);
-                throw new InvalidOperationException(error?.Message ?? "Creation session refusee.");
-            }
-
-            var hostResponse = envelope.Payload.Deserialize<HostSessionResponse>(jsonOptions)
-                ?? throw new InvalidOperationException("Payload host invalide.");
-
-            HostSessionCodeTextBox.Text = hostResponse.SessionCode;
-            JoinSessionCodeTextBox.Text = hostResponse.SessionCode;
+            HostSessionCodeTextBox.Text = hostResponse.Code;
+            JoinSessionCodeTextBox.Text = hostResponse.Code;
             JoinHostPortTextBox.Text = port.ToString();
             HostIpTextBox.Text = GetLocalIPv4Address() ?? "IP LAN non detectee";
             JoinHostIpTextBox.Text = HostIpTextBox.Text;
 
-            Log($"Session creee. Code: {hostResponse.SessionCode}. Port: {port}. LAN: {(allowLan ? "oui" : "non")}");
-            hostListenTask = ListenLoopAsync(hostClientWebSocket, "HOST", hostCancellationSource.Token);
+            Log($"Session creee. Code: {hostResponse.Code}. Port: {port}. LAN: {(allowLan ? "oui" : "non")}");
         }
         catch (Exception exception)
         {
-            Log($"Erreur host: {exception.Message}");
+            Log($"Erreur host: {FormatExceptionForLog(exception)} | State={BuildHostStateForLog()}");
         }
         finally
         {
@@ -122,9 +105,11 @@ public partial class MainWindow : Window
 
             await StopJoinResourcesAsync();
 
-            joinClientWebSocket = new ClientWebSocket();
             var cancellationToken = CancellationToken.None;
-            await joinClientWebSocket.ConnectAsync(new Uri($"ws://{hostIp}:{port}/session/"), cancellationToken);
+            joinClientWebSocket = await CreateConnectedSocketWithRetryAsync(
+                $"ws://{hostIp}:{port}/session/",
+                cancellationToken,
+                message => Log($"Join connect: {message}"));
 
             var joinUserId = Guid.NewGuid().ToString();
             await SendAsync(
@@ -159,7 +144,7 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             JoinStatusTextBlock.Text = "Statut: erreur";
-            Log($"Erreur join: {exception.Message}");
+            Log($"Erreur join: {FormatExceptionForLog(exception)}");
         }
         finally
         {
@@ -179,24 +164,24 @@ public partial class MainWindow : Window
         try
         {
             hostCancellationSource?.Cancel();
-            if (hostClientWebSocket is not null)
+
+            if (hostServer is not null)
             {
-                await CloseSocketSafeAsync(hostClientWebSocket);
-                hostClientWebSocket.Dispose();
-                hostClientWebSocket = null;
+                hostServer.MemberJoined -= OnHostMemberJoined;
             }
 
             hostServer?.Dispose();
             hostServer = null;
 
-            if (hostListenTask is not null)
+            if (hostServerRunTask is not null)
             {
-                await hostListenTask;
-                hostListenTask = null;
+                await hostServerRunTask;
             }
+            hostServerRunTask = null;
         }
-        catch
+        catch (Exception exception)
         {
+            Log($"Erreur stop host: {FormatExceptionForLog(exception)}");
         }
         finally
         {
@@ -212,18 +197,20 @@ public partial class MainWindow : Window
             if (joinClientWebSocket is not null)
             {
                 await CloseSocketSafeAsync(joinClientWebSocket);
-                joinClientWebSocket.Dispose();
-                joinClientWebSocket = null;
             }
 
             if (joinListenTask is not null)
             {
                 await joinListenTask;
-                joinListenTask = null;
             }
+
+            joinClientWebSocket?.Dispose();
+            joinClientWebSocket = null;
+            joinListenTask = null;
         }
-        catch
+        catch (Exception exception)
         {
+            Log($"Erreur stop join: {FormatExceptionForLog(exception)}");
         }
     }
 
@@ -251,14 +238,22 @@ public partial class MainWindow : Window
                 }
             }
         }
-        catch (Exception)
+        catch (OperationCanceledException)
         {
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (Exception exception)
+        {
+            Log($"Erreur loop {source}: {FormatExceptionForLog(exception)}");
         }
     }
 
     private static async Task<ClientWebSocket> CreateConnectedSocketWithRetryAsync(
         string url,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<string>? onAttemptFailure = null)
     {
         const int maxAttempts = 10;
         Exception? lastError = null;
@@ -272,21 +267,22 @@ public partial class MainWindow : Window
                 await socket.ConnectAsync(new Uri(url), cancellationToken);
                 return socket;
             }
-            catch (Exception exception) when (attempt < maxAttempts)
+            catch (Exception exception)
             {
                 lastError = exception;
+                onAttemptFailure?.Invoke(
+                    $"attempt={attempt}/{maxAttempts}; url={url}; error={exception.GetType().Name}: {exception.Message}");
                 socket.Dispose();
-                await Task.Delay(100, cancellationToken);
-            }
 
-            if (socket.State != WebSocketState.Open)
-            {
-                socket.Dispose();
+                if (attempt < maxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100 * attempt), cancellationToken);
+                }
             }
         }
 
         throw new InvalidOperationException(
-            "Connexion WebSocket impossible apres plusieurs tentatives.",
+            $"Connexion WebSocket impossible apres plusieurs tentatives vers {url}.",
             lastError);
     }
 
@@ -331,6 +327,59 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnHostMemberJoined(MemberJoinedNotification notification)
+    {
+        _ = Dispatcher.InvokeAsync(() =>
+            Log($"[HOST] {notification.DisplayName} a rejoint la session {notification.SessionCode}."));
+    }
+
+    private static string FormatExceptionForLog(Exception exception)
+    {
+        var builder = new StringBuilder();
+        var current = exception;
+        var level = 0;
+
+        while (current is not null)
+        {
+            var prefix = level == 0 ? "" : $" -> inner[{level}] ";
+            builder.Append(prefix)
+                .Append(current.GetType().Name)
+                .Append(": ")
+                .Append(current.Message)
+                .Append(" (HResult=")
+                .Append(current.HResult)
+                .Append(')');
+
+            if (!string.IsNullOrWhiteSpace(current.StackTrace))
+            {
+                var stack = current.StackTrace
+                    .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                    .Take(4);
+                builder.Append(" [stack: ")
+                    .Append(string.Join(" || ", stack))
+                    .Append(']');
+            }
+
+            current = current.InnerException;
+            level++;
+
+            if (current is not null)
+            {
+                builder.Append(';');
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    private string BuildHostStateForLog()
+    {
+        var process = Process.GetCurrentProcess();
+        return $"pid={process.Id}; hostServer={(hostServer is null ? "null" : "set")}; " +
+               $"hostRunTask={(hostServerRunTask is null ? "null" : hostServerRunTask.Status.ToString())}; " +
+               $"hostCts={(hostCancellationSource is null ? "null" : "set")}";
+    }
+
     private void Log(string message)
     {
         LogsListBox.Items.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
@@ -338,6 +387,13 @@ public partial class MainWindow : Window
 
     private static string? GetLocalIPv4Address()
     {
+        return GetLocalIPv4Addresses().FirstOrDefault();
+    }
+
+    private static IReadOnlyList<string> GetLocalIPv4Addresses()
+    {
+        var addresses = new List<string>();
+
         foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
         {
             if (networkInterface.OperationalStatus != OperationalStatus.Up)
@@ -351,11 +407,11 @@ public partial class MainWindow : Window
                 if (unicastAddress.Address.AddressFamily == AddressFamily.InterNetwork
                     && !IPAddress.IsLoopback(unicastAddress.Address))
                 {
-                    return unicastAddress.Address.ToString();
+                    addresses.Add(unicastAddress.Address.ToString());
                 }
             }
         }
 
-        return null;
+        return addresses;
     }
 }

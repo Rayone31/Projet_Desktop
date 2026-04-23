@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -9,13 +10,23 @@ namespace DMsound.Session.Infrastructure.Network;
 
 public sealed class SessionHostWebSocketServer : IDisposable
 {
-    private const string LanPrefixHost = "+";
-    private const string LocalPrefixHost = "127.0.0.1";
+    private const string LoopbackIp = "127.0.0.1";
+    private const string LocalhostName = "localhost";
 
+    private readonly string[] configuredPrefixes;
     private readonly CreateSessionUseCase createSessionUseCase;
+    private readonly object lifecycleSync = new();
     private readonly HttpListener listener;
+    private volatile bool isDisposed;
     private readonly JoinSessionByCodeUseCase joinSessionUseCase;
     private readonly SessionWebSocketSessionHub sessionHub;
+
+    public event Action<MemberJoinedNotification>? MemberJoined;
+
+    public IReadOnlyList<string> GetConfiguredPrefixes()
+    {
+        return configuredPrefixes;
+    }
 
     public SessionHostWebSocketServer(
         int port,
@@ -29,23 +40,154 @@ public sealed class SessionHostWebSocketServer : IDisposable
         this.sessionHub = sessionHub ?? new SessionWebSocketSessionHub();
         listener = new HttpListener();
 
-        var hostPrefix = allowLanConnections ? LanPrefixHost : LocalPrefixHost;
-        listener.Prefixes.Add($"http://{hostPrefix}:{port}/session/");
+        configuredPrefixes = BuildPrefixes(port, allowLanConnections)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        foreach (var prefix in configuredPrefixes)
+        {
+            listener.Prefixes.Add(prefix);
+        }
     }
 
     public void Dispose()
     {
-        if (listener.IsListening)
+        lock (lifecycleSync)
         {
-            listener.Stop();
+            if (isDisposed)
+            {
+                return;
+            }
+
+            isDisposed = true;
+
+            if (listener.IsListening)
+            {
+                listener.Stop();
+            }
+
+            listener.Close();
+        }
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            lock (lifecycleSync)
+            {
+                if (isDisposed)
+                {
+                    throw new InvalidOperationException("Le serveur host est deja arrete ou en cours d'arret.");
+                }
+
+                if (listener.IsListening)
+                {
+                    return Task.CompletedTask;
+                }
+
+                listener.Start();
+            }
+        }
+        catch (HttpListenerException exception) when (exception.ErrorCode == 5)
+        {
+            throw new InvalidOperationException(BuildAccessDeniedMessage(), exception);
+        }
+        catch (HttpListenerException exception)
+        {
+            throw new InvalidOperationException(BuildListenerStartupFailureMessage(exception), exception);
+        }
+        catch (ObjectDisposedException exception)
+        {
+            throw new InvalidOperationException("Le serveur host a ete dispose pendant le demarrage.", exception);
         }
 
-        listener.Close();
+        return Task.CompletedTask;
+    }
+
+    private static IEnumerable<string> BuildPrefixes(int port, bool allowLanConnections)
+    {
+        var prefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            BuildPrefix(LoopbackIp, port),
+            BuildPrefix(LocalhostName, port)
+        };
+
+        if (!allowLanConnections)
+        {
+            return prefixes;
+        }
+
+        foreach (var address in GetLanIPv4Addresses())
+        {
+            prefixes.Add(BuildPrefix(address.ToString(), port));
+        }
+
+        return prefixes;
+    }
+
+    private static IEnumerable<IPAddress> GetLanIPv4Addresses()
+    {
+        IPAddress[] addresses;
+
+        try
+        {
+            addresses = Dns.GetHostAddresses(Dns.GetHostName());
+        }
+        catch (SocketException)
+        {
+            return Array.Empty<IPAddress>();
+        }
+
+        return addresses.Where(address =>
+            address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+            && !IPAddress.IsLoopback(address));
+    }
+
+    private static string BuildPrefix(string host, int port)
+    {
+        return $"http://{host}:{port}/session/";
+    }
+
+    private string BuildAccessDeniedMessage()
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine("HttpListener access denied. URL ACL is missing for one or more prefixes.");
+        builder.AppendLine("Run an elevated terminal and grant access:");
+
+        foreach (var prefix in configuredPrefixes)
+        {
+            builder.AppendLine($"netsh http add urlacl url={prefix} user=Everyone");
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    private string BuildListenerStartupFailureMessage(HttpListenerException exception)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine($"Echec du demarrage HttpListener (code={exception.ErrorCode}).");
+        builder.AppendLine($"Detail: {exception.Message}");
+        builder.AppendLine("Prefixes configures:");
+
+        foreach (var prefix in configuredPrefixes)
+        {
+            builder.AppendLine(prefix);
+        }
+
+        return builder.ToString().TrimEnd();
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
-        listener.Start();
+        if (isDisposed)
+        {
+            return;
+        }
+
+        await StartAsync(cancellationToken);
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -82,8 +224,17 @@ public sealed class SessionHostWebSocketServer : IDisposable
             return;
         }
 
-        var webSocketContext = await context.AcceptWebSocketAsync(null);
-        await HandleWebSocketAsync(webSocketContext.WebSocket, cancellationToken);
+        try
+        {
+            var webSocketContext = await context.AcceptWebSocketAsync(null);
+            await HandleWebSocketAsync(webSocketContext.WebSocket, cancellationToken);
+        }
+        catch (HttpListenerException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     private async Task HandleWebSocketAsync(WebSocket socket, CancellationToken cancellationToken)
@@ -169,6 +320,7 @@ public sealed class SessionHostWebSocketServer : IDisposable
         CancellationToken cancellationToken)
     {
         var notification = new MemberJoinedNotification(sessionCode, request.UserId, request.DisplayName);
+        MemberJoined?.Invoke(notification);
         return sessionHub.BroadcastAsync(
             sessionCode,
             SessionWebSocketJson.Serialize(SessionWebSocketMessageTypes.MemberJoined, notification),
