@@ -46,35 +46,42 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\maell\\.nuget\\packages\\": {}
+    "C:\\Users\\dylan\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\DMsound.Session.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\DMsound.Session.Infrastructure.csproj",
       "projectName": "DMsound.Session.Infrastructure",
-      "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\DMsound.Session.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\maell\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\DMsound.Session.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\dylan\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\maell\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\dylan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj": {
-              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj"
+            "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj": {
+              "projectPath": "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Application\\DMsound.Session.Application.csproj"
             },
-            "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj": {
-              "projectPath": "C:\\Users\\maell\\Documents\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj"
+            "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj": {
+              "projectPath": "C:\\Users\\dylan\\OneDrive - Ynov\\Ynov\\B3\\Deckstop\\test_reseaux\\Projet_Desktop\\src\\DMsound.Session.Domain\\DMsound.Session.Domain.csproj"
             }
           }
         }
