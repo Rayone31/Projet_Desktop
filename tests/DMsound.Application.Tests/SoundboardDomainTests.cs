@@ -27,4 +27,25 @@ public sealed class SoundboardDomainTests
 
         Assert.Equal("Bass Kick", sound.Name);
     }
+
+    [Fact]
+    public void Sound_update_file_path_updates_path()
+    {
+        var sound = new Sound(SoundId.New(), "Kick", "kick.mp3");
+
+        sound.UpdateFilePath("kick-trimmed.wav");
+
+        Assert.Equal("kick-trimmed.wav", sound.FilePath);
+    }
+
+    [Fact]
+    public void Sound_restore_original_file_path_restores_initial_path()
+    {
+        var sound = new Sound(SoundId.New(), "Kick", "kick.mp3");
+
+        sound.UpdateFilePath("kick-trimmed.wav");
+        sound.RestoreOriginalFilePath();
+
+        Assert.Equal("kick.mp3", sound.FilePath);
+    }
 }

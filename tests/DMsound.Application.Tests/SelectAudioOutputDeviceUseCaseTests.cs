@@ -20,6 +20,24 @@ public sealed class SelectAudioOutputDeviceUseCaseTests
     private sealed class FakeSoundPlaybackService : ISoundPlaybackService
     {
         public int? SelectedOutputDeviceNumber { get; private set; }
+        
+            public AudioWaveformAnalysis AnalyzeWaveform(string filePath, int peakCount)
+            {
+                return new AudioWaveformAnalysis(0d, []);
+            }
+        
+            public void PreviewSegment(string filePath, TimeSpan start, TimeSpan end)
+            {
+            }
+        
+            public string TrimSegment(string filePath, TimeSpan start, TimeSpan end)
+            {
+                return filePath;
+            }
+
+            public void Stop()
+            {
+            }
 
         public void Play(string filePath)
         {
