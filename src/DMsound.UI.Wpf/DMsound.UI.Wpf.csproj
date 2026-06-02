@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DMsound.Application\DMsound.Application.csproj" />
     <ProjectReference Include="..\DMsound.Infrastructure.Audio\DMsound.Infrastructure.Audio.csproj" />
+    <ProjectReference Include="..\DMsound.Session.LanTester\DMsound.Session.LanTester.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

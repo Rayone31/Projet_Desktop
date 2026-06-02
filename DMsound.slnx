@@ -4,8 +4,13 @@
     <Project Path="src/DMsound.Domain/DMsound.Domain.csproj" />
     <Project Path="src/DMsound.Infrastructure.Audio/DMsound.Infrastructure.Audio.csproj" />
     <Project Path="src/DMsound.UI.Wpf/DMsound.UI.Wpf.csproj" />
+    <Project Path="src/DMsound.Session.Domain/DMsound.Session.Domain.csproj" />
+    <Project Path="src/DMsound.Session.Application/DMsound.Session.Application.csproj" />
+    <Project Path="src/DMsound.Session.Infrastructure/DMsound.Session.Infrastructure.csproj" />
+    <Project Path="src/DMsound.Session.LanTester/DMsound.Session.LanTester.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DMsound.Application.Tests/DMsound.Application.Tests.csproj" />
+    <Project Path="tests/DMsound.Session.Tests/DMsound.Session.Tests.csproj" />
   </Folder>
 </Solution>

@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using DMsound.Session.LanTester;
 using DMsound.UI.Wpf.Infrastructure;
 
 namespace DMsound.UI.Wpf;
@@ -62,5 +63,14 @@ public partial class MainWindow : Window
         }
 
         _viewModel.ImportAudioFiles(dialog.FileNames);
+    }
+
+    private void OnOpenSessionClicked(object sender, RoutedEventArgs e)
+    {
+        var sessionWindow = new DMsound.Session.LanTester.MainWindow
+        {
+            Owner = this
+        };
+        sessionWindow.Show();
     }
 }

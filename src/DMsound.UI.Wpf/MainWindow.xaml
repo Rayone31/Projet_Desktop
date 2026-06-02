@@ -51,6 +51,14 @@
                         Foreground="#0F172A"
                         BorderBrush="#0284C7"
                         VerticalAlignment="Center" />
+                    <Button Content="Session"
+                        Click="OnOpenSessionClicked"
+                        Margin="12,0,0,0"
+                        Padding="14,6"
+                        Background="#22C55E"
+                        Foreground="#0F172A"
+                        BorderBrush="#15803D"
+                        VerticalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
