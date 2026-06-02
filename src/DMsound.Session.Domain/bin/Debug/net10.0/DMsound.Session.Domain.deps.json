@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "DMsound.Session.Domain/1.0.0": {
+        "runtime": {
+          "DMsound.Session.Domain.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DMsound.Session.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

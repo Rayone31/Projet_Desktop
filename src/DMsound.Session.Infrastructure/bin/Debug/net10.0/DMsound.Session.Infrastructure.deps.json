@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "DMsound.Session.Infrastructure/1.0.0": {
+        "dependencies": {
+          "DMsound.Session.Application": "1.0.0",
+          "DMsound.Session.Domain": "1.0.0"
+        },
+        "runtime": {
+          "DMsound.Session.Infrastructure.dll": {}
+        }
+      },
+      "DMsound.Session.Application/1.0.0": {
+        "dependencies": {
+          "DMsound.Session.Domain": "1.0.0"
+        },
+        "runtime": {
+          "DMsound.Session.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "DMsound.Session.Domain/1.0.0": {
+        "runtime": {
+          "DMsound.Session.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DMsound.Session.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "DMsound.Session.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "DMsound.Session.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

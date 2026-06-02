@@ -1,0 +1,16 @@
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\bin\Debug\net10.0\DMsound.Session.Application.deps.json
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\bin\Debug\net10.0\DMsound.Session.Application.dll
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\bin\Debug\net10.0\DMsound.Session.Application.pdb
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\bin\Debug\net10.0\DMsound.Session.Domain.dll
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\bin\Debug\net10.0\DMsound.Session.Domain.pdb
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.csproj.AssemblyReference.cache
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.AssemblyInfoInputs.cache
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.AssemblyInfo.cs
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.csproj.CoreCompileInputs.cache
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.sourcelink.json
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound..9720CC02.Up2Date
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.dll
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\refint\DMsound.Session.Application.dll
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\DMsound.Session.Application.pdb
+C:\Users\dylan\OneDrive - Ynov\Ynov\B3\Deckstop\test_reseaux\Projet_Desktop\src\DMsound.Session.Application\obj\Debug\net10.0\ref\DMsound.Session.Application.dll
