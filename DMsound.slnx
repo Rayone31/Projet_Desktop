@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DMsound.Application/DMsound.Application.csproj" />
+    <Project Path="src/DMsound.Domain/DMsound.Domain.csproj" />
+    <Project Path="src/DMsound.Infrastructure.Audio/DMsound.Infrastructure.Audio.csproj" />
+    <Project Path="src/DMsound.UI.Wpf/DMsound.UI.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DMsound.Application.Tests/DMsound.Application.Tests.csproj" />
+  </Folder>
+</Solution>
