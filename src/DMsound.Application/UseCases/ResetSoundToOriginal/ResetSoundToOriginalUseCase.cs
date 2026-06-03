@@ -12,20 +12,21 @@ public sealed class ResetSoundToOriginalUseCase
         _repository = repository;
     }
 
-    public void Execute(SoundboardId soundboardId, SoundId soundId, string? editedFilePath = null)
+    public void Execute(SoundboardId soundboardId, SoundId soundId, string? pendingModifiedFilePath = null)
     {
         var soundboard = _repository.GetById(soundboardId)
             ?? throw new InvalidOperationException("La soundboard demandee est introuvable.");
 
         var sound = soundboard.GetSoundById(soundId);
 
-        if (!string.IsNullOrWhiteSpace(editedFilePath)
-            && !string.Equals(editedFilePath.Trim(), sound.OriginalFilePath, StringComparison.OrdinalIgnoreCase)
-            && File.Exists(editedFilePath))
+        if (!string.IsNullOrWhiteSpace(pendingModifiedFilePath)
+            && !string.Equals(pendingModifiedFilePath.Trim(), sound.InitialFilePath, StringComparison.OrdinalIgnoreCase)
+            && File.Exists(pendingModifiedFilePath))
         {
-            File.Delete(editedFilePath);
+            File.Delete(pendingModifiedFilePath);
         }
 
-        sound.RestoreOriginalFilePath();
+        sound.RestoreInitialFilePath();
+        _repository.Update(soundboard);
     }
 }

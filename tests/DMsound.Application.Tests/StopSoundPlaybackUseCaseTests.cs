@@ -40,6 +40,10 @@ public sealed class StopSoundPlaybackUseCaseTests
             StopCalled = true;
         }
 
+        public void Play(string filePath, bool muteMicDuringPlayback) { }
+
+        public bool IsMicMuteSupported() => false;
+
         public void Play(string filePath)
         {
         }

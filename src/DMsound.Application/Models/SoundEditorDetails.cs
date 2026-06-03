@@ -5,7 +5,7 @@ namespace DMsound.Application.Models;
 public sealed record SoundEditorDetails(
     SoundId Id,
     string Name,
-    string OriginalFilePath,
-    string FilePath,
+    string InitialFilePath,
+    string ModifiedFilePath,
     double DurationSeconds,
     IReadOnlyList<double> WaveformPeaks);

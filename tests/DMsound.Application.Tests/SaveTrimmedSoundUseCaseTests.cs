@@ -18,7 +18,8 @@ public sealed class SaveTrimmedSoundUseCaseTests
 
         useCase.Execute(soundboard.Id, sound.Id, "kick-trimmed.wav");
 
-        Assert.Equal("kick-trimmed.wav", sound.FilePath);
+        Assert.Equal("kick-trimmed.wav", sound.ModifiedFilePath);
+        Assert.Equal("kick.wav", sound.InitialFilePath);
     }
 
     private sealed class FakeSoundboardRepository : ISoundboardRepository
@@ -28,6 +29,11 @@ public sealed class SaveTrimmedSoundUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

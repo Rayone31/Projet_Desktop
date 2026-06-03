@@ -21,7 +21,7 @@ public sealed class TrimSoundSelectionUseCaseTests
         var result = useCase.Execute(soundboard.Id, sound.Id, 1d, 3d);
 
         Assert.Equal("kick-trimmed.wav", result);
-        Assert.Equal("kick.wav", sound.FilePath);
+        Assert.Equal("kick.wav", sound.ModifiedFilePath);
         Assert.Equal(TimeSpan.FromSeconds(1d), audioEditorService.LastStart);
         Assert.Equal(TimeSpan.FromSeconds(3d), audioEditorService.LastEnd);
     }
@@ -56,6 +56,11 @@ public sealed class TrimSoundSelectionUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

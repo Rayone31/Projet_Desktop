@@ -63,6 +63,10 @@ public sealed class PlaySoundByHotkeyUseCaseTests
             {
             }
 
+        public void Play(string filePath, bool muteMicDuringPlayback) { }
+
+        public bool IsMicMuteSupported() => false;
+
         public void Play(string filePath)
         {
             LastPlayedFilePath = filePath;
@@ -91,6 +95,11 @@ public sealed class PlaySoundByHotkeyUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

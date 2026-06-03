@@ -33,9 +33,9 @@ public sealed class SoundboardDomainTests
     {
         var sound = new Sound(SoundId.New(), "Kick", "kick.mp3");
 
-        sound.UpdateFilePath("kick-trimmed.wav");
+        sound.UpdateModifiedFilePath("kick-trimmed.wav");
 
-        Assert.Equal("kick-trimmed.wav", sound.FilePath);
+        Assert.Equal("kick-trimmed.wav", sound.ModifiedFilePath);
     }
 
     [Fact]
@@ -43,9 +43,9 @@ public sealed class SoundboardDomainTests
     {
         var sound = new Sound(SoundId.New(), "Kick", "kick.mp3");
 
-        sound.UpdateFilePath("kick-trimmed.wav");
-        sound.RestoreOriginalFilePath();
+        sound.UpdateModifiedFilePath("kick-trimmed.wav");
+        sound.RestoreInitialFilePath();
 
-        Assert.Equal("kick.mp3", sound.FilePath);
+        Assert.Equal("kick.mp3", sound.ModifiedFilePath);
     }
 }

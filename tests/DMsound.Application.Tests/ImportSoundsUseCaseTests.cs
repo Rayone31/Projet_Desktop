@@ -12,7 +12,7 @@ public sealed class ImportSoundsUseCaseTests
         var repository = new FakeSoundboardRepository();
         var soundboard = new Soundboard(SoundboardId.New(), "Gaming");
         repository.Add(soundboard);
-        var useCase = new ImportSoundsUseCase(repository);
+        var useCase = new ImportSoundsUseCase(repository, new PassthroughAudioLibraryStorage());
         var filePath = CreateAudioFile("victory.mp3");
 
         var importedSounds = useCase.Execute(soundboard.Id, [filePath]);
@@ -20,7 +20,10 @@ public sealed class ImportSoundsUseCaseTests
         Assert.Single(importedSounds);
         Assert.Equal("victory", importedSounds[0].Name);
         Assert.Single(soundboard.Sounds);
-        Assert.Equal(filePath, soundboard.Sounds.First().FilePath);
+        var importedSound = soundboard.Sounds.First();
+        Assert.Equal("victory", importedSound.Name);
+        Assert.True(File.Exists(importedSound.InitialFilePath));
+        Assert.Equal(importedSound.InitialFilePath, importedSound.ModifiedFilePath);
     }
 
     [Fact]
@@ -29,7 +32,7 @@ public sealed class ImportSoundsUseCaseTests
         var repository = new FakeSoundboardRepository();
         var soundboard = new Soundboard(SoundboardId.New(), "Gaming");
         repository.Add(soundboard);
-        var useCase = new ImportSoundsUseCase(repository);
+        var useCase = new ImportSoundsUseCase(repository, new PassthroughAudioLibraryStorage());
         var filePath = CreateAudioFile("notes.txt");
 
         var exception = Assert.Throws<InvalidOperationException>(() => useCase.Execute(soundboard.Id, [filePath]));
@@ -48,6 +51,11 @@ public sealed class ImportSoundsUseCaseTests
         return filePath;
     }
 
+    private sealed class PassthroughAudioLibraryStorage : IAudioLibraryStorage
+    {
+        public string StoreOriginal(string sourceFilePath) => sourceFilePath;
+    }
+
     private sealed class FakeSoundboardRepository : ISoundboardRepository
     {
         private readonly List<Soundboard> _items = new();
@@ -55,6 +63,11 @@ public sealed class ImportSoundsUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

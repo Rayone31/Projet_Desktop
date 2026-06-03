@@ -19,7 +19,7 @@ public sealed class GetSoundboardDetailsUseCase
             ?? throw new InvalidOperationException("La soundboard demandee est introuvable.");
 
         var sounds = soundboard.Sounds
-            .Select(sound => new SoundSummary(sound.Id, sound.Name, sound.FilePath, sound.Hotkey))
+            .Select(sound => new SoundSummary(sound.Id, sound.Name, sound.Hotkey))
             .ToArray();
 
         return new SoundboardDetails(soundboard.Id, soundboard.Name, sounds);

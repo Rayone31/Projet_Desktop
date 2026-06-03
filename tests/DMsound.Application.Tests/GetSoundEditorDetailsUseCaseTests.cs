@@ -21,7 +21,8 @@ public sealed class GetSoundEditorDetailsUseCaseTests
         var result = useCase.Execute(soundboard.Id, sound.Id);
 
         Assert.Equal("Kick", result.Name);
-        Assert.Equal("kick.wav", result.OriginalFilePath);
+        Assert.Equal("kick.wav", result.InitialFilePath);
+        Assert.Equal("kick.wav", result.ModifiedFilePath);
         Assert.Equal(12.5d, result.DurationSeconds);
         Assert.Equal([10d, 25d, 50d], result.WaveformPeaks);
     }
@@ -50,6 +51,11 @@ public sealed class GetSoundEditorDetailsUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

@@ -19,7 +19,7 @@ public sealed class PreviewSoundSelectionUseCase
         var sound = GetSound(soundboardId, soundId);
         ValidateRange(startSeconds, endSeconds);
 
-        _audioEditorService.PreviewSegment(sound.FilePath, TimeSpan.FromSeconds(startSeconds), TimeSpan.FromSeconds(endSeconds));
+        _audioEditorService.PreviewSegment(sound.ModifiedFilePath, TimeSpan.FromSeconds(startSeconds), TimeSpan.FromSeconds(endSeconds));
     }
 
     private Sound GetSound(SoundboardId soundboardId, SoundId soundId)

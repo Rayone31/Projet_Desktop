@@ -13,14 +13,14 @@ public sealed class ResetSoundToOriginalUseCaseTests
         var soundboard = new Soundboard(SoundboardId.New(), "Gaming");
         var sound = new Sound(SoundId.New(), "Kick", "kick.mp3");
         var editedFilePath = CreateEditedFile();
-        sound.UpdateFilePath(editedFilePath);
+        sound.UpdateModifiedFilePath(editedFilePath);
         soundboard.AddSound(sound);
         repository.Add(soundboard);
         var useCase = new ResetSoundToOriginalUseCase(repository);
 
         useCase.Execute(soundboard.Id, sound.Id, editedFilePath);
 
-        Assert.Equal("kick.mp3", sound.FilePath);
+        Assert.Equal("kick.mp3", sound.ModifiedFilePath);
         Assert.False(File.Exists(editedFilePath));
     }
 
@@ -41,6 +41,11 @@ public sealed class ResetSoundToOriginalUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

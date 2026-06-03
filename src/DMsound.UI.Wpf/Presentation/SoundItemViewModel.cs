@@ -5,7 +5,9 @@ namespace DMsound.UI.Wpf.Presentation;
 
 internal sealed class SoundItemViewModel : ObservableObject
 {
+    private string _name;
     private string _hotkeyDraft;
+    private string _nameDraft;
 
     public SoundItemViewModel(
         SoundId id,
@@ -13,20 +15,33 @@ internal sealed class SoundItemViewModel : ObservableObject
         string? hotkey,
         ICommand playCommand,
         ICommand assignHotkeyCommand,
-        ICommand selectCommand)
+        ICommand selectCommand,
+        ICommand renameSoundCommand)
     {
         Id = id;
-        Name = name;
+        _name = name;
+        _nameDraft = name;
         Hotkey = hotkey;
         PlayCommand = playCommand;
         AssignHotkeyCommand = assignHotkeyCommand;
         SelectCommand = selectCommand;
+        RenameSoundCommand = renameSoundCommand;
         _hotkeyDraft = hotkey ?? string.Empty;
     }
 
     public SoundId Id { get; }
 
-    public string Name { get; }
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
+
+    public string NameDraft
+    {
+        get => _nameDraft;
+        set => SetProperty(ref _nameDraft, value);
+    }
 
     public string? Hotkey { get; private set; }
 
@@ -42,10 +57,18 @@ internal sealed class SoundItemViewModel : ObservableObject
 
     public ICommand SelectCommand { get; }
 
+    public ICommand RenameSoundCommand { get; }
+
     public void UpdateHotkey(string? hotkey)
     {
         Hotkey = hotkey;
         HotkeyDraft = hotkey ?? string.Empty;
         OnPropertyChanged(nameof(Hotkey));
+    }
+
+    public void UpdateName(string name)
+    {
+        Name = name;
+        NameDraft = name;
     }
 }

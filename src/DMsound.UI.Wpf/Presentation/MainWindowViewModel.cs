@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Threading;
 using DMsound.Application.Models;
 using DMsound.Application.UseCases.AnalyzeAudioFile;
+using DMsound.Application.UseCases.RenameSoundboard;
+using DMsound.Application.UseCases.RenameSound;
 using DMsound.Application.UseCases.AssignHotkey;
 using DMsound.Application.UseCases.GetSoundboardDetails;
 using DMsound.Application.UseCases.GetSoundEditorDetails;
@@ -40,6 +42,8 @@ internal sealed class MainWindowViewModel : ObservableObject
     private readonly AssignHotkeyUseCase _assignHotkeyUseCase;
     private readonly PlaySoundUseCase _playSoundUseCase;
     private readonly PlaySoundByHotkeyUseCase _playSoundByHotkeyUseCase;
+    private readonly RenameSoundboardUseCase _renameSoundboardUseCase;
+    private readonly RenameSoundUseCase _renameSoundUseCase;
 
     private SoundboardItemViewModel? _selectedSoundboard;
     private AudioOutputDeviceItemViewModel? _selectedAudioOutputDevice;
@@ -54,15 +58,20 @@ internal sealed class MainWindowViewModel : ObservableObject
     private double _selectionStartSeconds;
     private double _selectionEndSeconds = 1d;
 
-    private string _editableFilePath = string.Empty;
+    private string _editableModifiedFilePath = string.Empty;
     private Visibility _editorVisibility = Visibility.Collapsed;
     private string _statusMessage = "Choisis une soundboard.";
+    private string _soundboardNameDraft = string.Empty;
+    private string _activeSoundNameDraft = string.Empty;
 
     private readonly DispatcherTimer _playbackCursorTimer;
     private DateTime _playbackCursorStartUtc;
     private double _playbackCursorStartSeconds;
     private double _playbackCursorEndSeconds;
     private bool _playbackCursorForOriginalWaveform;
+
+    public event Action<string>? HotkeyRegistrationRequested;
+    public event Action<string>? HotkeyUnregistrationRequested;
 
     public MainWindowViewModel(
         ListVisibleSoundboardsUseCase listVisibleSoundboardsUseCase,
@@ -79,7 +88,9 @@ internal sealed class MainWindowViewModel : ObservableObject
         SelectAudioOutputDeviceUseCase selectAudioOutputDeviceUseCase,
         AssignHotkeyUseCase assignHotkeyUseCase,
         PlaySoundUseCase playSoundUseCase,
-        PlaySoundByHotkeyUseCase playSoundByHotkeyUseCase)
+        PlaySoundByHotkeyUseCase playSoundByHotkeyUseCase,
+        RenameSoundboardUseCase renameSoundboardUseCase,
+        RenameSoundUseCase renameSoundUseCase)
     {
         _listVisibleSoundboardsUseCase = listVisibleSoundboardsUseCase;
         _getSoundboardDetailsUseCase = getSoundboardDetailsUseCase;
@@ -96,6 +107,8 @@ internal sealed class MainWindowViewModel : ObservableObject
         _assignHotkeyUseCase = assignHotkeyUseCase;
         _playSoundUseCase = playSoundUseCase;
         _playSoundByHotkeyUseCase = playSoundByHotkeyUseCase;
+        _renameSoundboardUseCase = renameSoundboardUseCase;
+        _renameSoundUseCase = renameSoundUseCase;
 
         Soundboards = new ObservableCollection<SoundboardItemViewModel>();
         Sounds = new ObservableCollection<SoundItemViewModel>();
@@ -165,6 +178,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         {
             if (SetProperty(ref _selectedSoundboard, value))
             {
+                SoundboardNameDraft = value?.Name ?? string.Empty;
                 LoadSelectedSoundboard();
             }
         }
@@ -195,10 +209,10 @@ internal sealed class MainWindowViewModel : ObservableObject
         private set => SetProperty(ref _editorVisibility, value);
     }
 
-    public string EditableFilePath
+    public string EditableModifiedFilePath
     {
-        get => _editableFilePath;
-        private set => SetProperty(ref _editableFilePath, value);
+        get => _editableModifiedFilePath;
+        private set => SetProperty(ref _editableModifiedFilePath, value);
     }
 
     public double OriginalDurationSeconds
@@ -297,6 +311,18 @@ internal sealed class MainWindowViewModel : ObservableObject
         set => SetProperty(ref _statusMessage, value);
     }
 
+    public string SoundboardNameDraft
+    {
+        get => _soundboardNameDraft;
+        set => SetProperty(ref _soundboardNameDraft, value);
+    }
+
+    public string ActiveSoundNameDraft
+    {
+        get => _activeSoundNameDraft;
+        set => SetProperty(ref _activeSoundNameDraft, value);
+    }
+
     public void Load()
     {
         LoadAudioOutputDevices();
@@ -312,6 +338,17 @@ internal sealed class MainWindowViewModel : ObservableObject
         if (SelectedSoundboard is null)
         {
             StatusMessage = "Aucune soundboard visible n'est disponible.";
+        }
+    }
+
+    public void RegisterAllHotkeys()
+    {
+        foreach (var sound in Sounds)
+        {
+            if (!string.IsNullOrWhiteSpace(sound.Hotkey))
+            {
+                HotkeyRegistrationRequested?.Invoke(sound.Hotkey);
+            }
         }
     }
 
@@ -348,8 +385,89 @@ internal sealed class MainWindowViewModel : ObservableObject
         try
         {
             var importedSounds = _importSoundsUseCase.Execute(SelectedSoundboard.Id, filePaths);
-            LoadSelectedSoundboard();
-            StatusMessage = $"{importedSounds.Count} fichier(s) audio importe(s) dans '{SelectedSoundboard.Name}'.";
+
+            if (importedSounds.Count == 0)
+            {
+                StatusMessage = "Aucun fichier audio n'a pu etre importe.";
+                return;
+            }
+
+            RefreshSounds();
+            StatusMessage = $"{importedSounds.Count} fichier(s) importe(s) dans '{SelectedSoundboard.Name}'.";
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = exception.Message;
+        }
+    }
+
+    public void RenameSelectedSoundboard()
+    {
+        if (SelectedSoundboard is null)
+        {
+            StatusMessage = "Selectionne d'abord une soundboard.";
+            return;
+        }
+
+        try
+        {
+            var currentName = SelectedSoundboard.Name;
+            var newName = SoundboardNameDraft;
+
+            if (string.IsNullOrWhiteSpace(newName) || newName == currentName)
+            {
+                StatusMessage = "Renommage annule.";
+                return;
+            }
+
+            _renameSoundboardUseCase.Execute(SelectedSoundboard.Id, newName);
+            SelectedSoundboard.Name = newName.Trim();
+            SoundboardNameDraft = SelectedSoundboard.Name;
+            StatusMessage = $"Soundboard renommee en '{SelectedSoundboard.Name}'.";
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = exception.Message;
+        }
+    }
+
+    public void RenameActiveSound(string newName)
+    {
+        if (SelectedSoundboard is null || !_editingSoundId.HasValue)
+        {
+            StatusMessage = "Aucun son en cours d'edition.";
+            return;
+        }
+
+        var soundVm = Sounds.FirstOrDefault(s => s.Id == _editingSoundId.Value);
+
+        if (soundVm is null)
+        {
+            return;
+        }
+
+        RenameSound(soundVm, newName);
+        ActiveSoundNameDraft = soundVm.Name;
+    }
+
+    public void RenameSound(SoundItemViewModel soundVm, string newName)
+    {
+        if (SelectedSoundboard is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newName) || newName == soundVm.Name)
+        {
+            StatusMessage = "Renommage annule.";
+            return;
+        }
+
+        try
+        {
+            _renameSoundUseCase.Execute(SelectedSoundboard.Id, soundVm.Id, newName);
+            soundVm.UpdateName(newName.Trim());
+            StatusMessage = $"Son renomme en '{soundVm.Name}'.";
         }
         catch (Exception exception)
         {
@@ -358,6 +476,22 @@ internal sealed class MainWindowViewModel : ObservableObject
     }
 
     private void LoadSelectedSoundboard()
+    {
+        UpdateSoundboardNameDraft();
+
+        if (SelectedSoundboard is null)
+        {
+            Sounds.Clear();
+            CloseEditor();
+            return;
+        }
+
+        RefreshSounds();
+        var details = _getSoundboardDetailsUseCase.Execute(SelectedSoundboard.Id);
+        StatusMessage = $"Soundboard '{details.Name}' chargee ({details.Sounds.Count} son(s)).";
+    }
+
+    private void RefreshSounds()
     {
         Sounds.Clear();
         CloseEditor();
@@ -373,19 +507,25 @@ internal sealed class MainWindowViewModel : ObservableObject
         {
             Sounds.Add(CreateSoundItemViewModel(details.Id, sound));
         }
+    }
 
-        StatusMessage = $"Soundboard '{details.Name}' chargee.";
+    private void UpdateSoundboardNameDraft()
+    {
+        SoundboardNameDraft = SelectedSoundboard?.Name ?? string.Empty;
     }
 
     private SoundItemViewModel CreateSoundItemViewModel(SoundboardId soundboardId, SoundSummary sound)
     {
-        return new SoundItemViewModel(
+        SoundItemViewModel? vm = null;
+        vm = new SoundItemViewModel(
             sound.Id,
             sound.Name,
             sound.Hotkey?.Value,
             new RelayCommand(() => PlaySound(soundboardId, sound)),
-            new RelayCommand(() => AssignHotkey(soundboardId, sound.Id)),
-            new RelayCommand(() => SelectSoundForEditing(soundboardId, sound.Id)));
+            new RelayCommand(() => AssignHotkey(soundboardId, vm!.Id)),
+            new RelayCommand(() => SelectSoundForEditing(soundboardId, vm!.Id)),
+            new RelayCommand(() => RenameSound(vm!, vm!.NameDraft)));
+        return vm;
     }
 
     private void SelectSoundForEditing(SoundboardId soundboardId, SoundId soundId)
@@ -398,7 +538,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             SelectedSoundEditor = details;
 
             EditorVisibility = Visibility.Visible;
-            EditableFilePath = details.FilePath;
+            EditableModifiedFilePath = details.ModifiedFilePath;
             OriginalDurationSeconds = details.DurationSeconds;
             EditableDurationSeconds = details.DurationSeconds;
 
@@ -409,6 +549,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
             FillWaveform(OriginalWaveformPeaks, details.WaveformPeaks);
             FillWaveform(EditableWaveformPeaks, details.WaveformPeaks);
+            ActiveSoundNameDraft = details.Name;
             StatusMessage = $"Editeur charge pour '{details.Name}'.";
         }
         catch (Exception exception)
@@ -430,7 +571,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             _resetSoundToOriginalUseCase.Execute(
                 SelectedSoundboard!.Id,
                 _editingSoundId!.Value,
-                _pendingTrimmedFilePath ?? SelectedSoundEditor?.FilePath);
+                _pendingTrimmedFilePath ?? SelectedSoundEditor?.ModifiedFilePath);
             _pendingTrimmedFilePath = null;
 
             SelectSoundForEditing(SelectedSoundboard.Id, _editingSoundId.Value);
@@ -458,7 +599,6 @@ internal sealed class MainWindowViewModel : ObservableObject
                 OriginalDurationSeconds);
 
             StartPlaybackCursorTracking(isOriginalWaveform: true, OriginalMarkerSeconds, OriginalDurationSeconds);
-
             StatusMessage = "Lecture de l'onde originale.";
         }
         catch (Exception exception)
@@ -488,7 +628,6 @@ internal sealed class MainWindowViewModel : ObservableObject
                 end);
 
             StartPlaybackCursorTracking(isOriginalWaveform: false, start, end);
-
             StatusMessage = "Lecture de l'onde modifiee.";
         }
         catch (Exception exception)
@@ -527,7 +666,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             _pendingTrimmedFilePath = trimmedPath;
             var analysis = _analyzeAudioFileUseCase.Execute(trimmedPath);
 
-            EditableFilePath = trimmedPath;
+            EditableModifiedFilePath = trimmedPath;
             EditableDurationSeconds = analysis.DurationSeconds;
             SelectionStartSeconds = 0d;
             SelectionEndSeconds = EditableDurationSeconds;
@@ -577,7 +716,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         SelectedSoundEditor = null;
         _editingSoundId = null;
         _pendingTrimmedFilePath = null;
-        EditableFilePath = string.Empty;
+        EditableModifiedFilePath = string.Empty;
 
         OriginalWaveformPeaks.Clear();
         EditableWaveformPeaks.Clear();
@@ -673,7 +812,19 @@ internal sealed class MainWindowViewModel : ObservableObject
         try
         {
             _assignHotkeyUseCase.Execute(soundboardId, soundId, sound.HotkeyDraft);
+            var oldHotkey = sound.Hotkey;
             sound.UpdateHotkey(sound.HotkeyDraft.ToUpperInvariant());
+
+            if (!string.IsNullOrWhiteSpace(oldHotkey))
+            {
+                HotkeyUnregistrationRequested?.Invoke(oldHotkey);
+            }
+
+            if (!string.IsNullOrWhiteSpace(sound.Hotkey))
+            {
+                HotkeyRegistrationRequested?.Invoke(sound.Hotkey);
+            }
+
             StatusMessage = $"Touche assignee a '{sound.Name}': {sound.Hotkey}.";
         }
         catch (Exception exception)

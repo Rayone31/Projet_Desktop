@@ -11,6 +11,9 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
     private int? _selectedOutputDeviceNumber;
     private WasapiOut? _outputDevice;
     private AudioFileReader? _audioFileReader;
+    private MMDevice? _micDevice;
+    private bool _micWasMuted;
+    private bool _muteMicDuringPlayback;
 
     public IReadOnlyList<AudioOutputDevice> GetOutputDevices()
     {
@@ -44,22 +47,39 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
         _selectedOutputDeviceNumber = deviceNumber;
     }
 
+    public bool IsMicMuteSupported()
+    {
+        try
+        {
+            using var enumerator = new MMDeviceEnumerator();
+            var mic = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+            return mic is not null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public void Play(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new ArgumentException("Le chemin du fichier audio ne peut pas etre vide.", nameof(filePath));
-        }
+        Play(filePath, muteMicDuringPlayback: false);
+    }
 
-        if (!File.Exists(filePath))
-        {
-            throw new FileNotFoundException("Le fichier audio est introuvable.", filePath);
-        }
-
+    public void Play(string filePath, bool muteMicDuringPlayback)
+    {
+        ValidateFilePath(filePath);
         DisposePlaybackResources();
+
+        _muteMicDuringPlayback = muteMicDuringPlayback;
 
         using var enumerator = new MMDeviceEnumerator();
         var outputDevice = ResolveOutputDevice(enumerator);
+
+        if (muteMicDuringPlayback)
+        {
+            MuteMic(enumerator);
+        }
 
         _audioFileReader = new AudioFileReader(filePath);
         PlaySource(outputDevice, (ISampleProvider)_audioFileReader);
@@ -67,15 +87,7 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
 
     public AudioWaveformAnalysis AnalyzeWaveform(string filePath, int peakCount)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new ArgumentException("Le chemin du fichier audio ne peut pas etre vide.", nameof(filePath));
-        }
-
-        if (!File.Exists(filePath))
-        {
-            throw new FileNotFoundException("Le fichier audio est introuvable.", filePath);
-        }
+        ValidateFilePath(filePath);
 
         if (peakCount <= 0)
         {
@@ -112,12 +124,12 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
     public void Stop()
     {
         _outputDevice?.Stop();
+        RestoreMic();
     }
 
     public void PreviewSegment(string filePath, TimeSpan start, TimeSpan end)
     {
         ValidateSegment(filePath, start, end);
-
         DisposePlaybackResources();
 
         using var enumerator = new MMDeviceEnumerator();
@@ -146,10 +158,9 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
             Take = end - start,
         };
 
-        // Créer le fichier trimmed dans le dossier AudioTrimmed
         var trimmedFolder = Path.Combine(AppContext.BaseDirectory, "Assets\\AudioTrimmed");
         Directory.CreateDirectory(trimmedFolder);
-        
+
         var outputPath = Path.Combine(
             trimmedFolder,
             $"{Path.GetFileNameWithoutExtension(filePath)}_trimmed.wav");
@@ -161,17 +172,56 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
     public void Dispose()
     {
         DisposePlaybackResources();
+        _micDevice?.Dispose();
+        _micDevice = null;
+    }
+
+    private void MuteMic(MMDeviceEnumerator enumerator)
+    {
+        try
+        {
+            _micDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+            _micWasMuted = _micDevice.AudioEndpointVolume.Mute;
+            _micDevice.AudioEndpointVolume.Mute = true;
+        }
+        catch
+        {
+            _micDevice = null;
+        }
+    }
+
+    private void RestoreMic()
+    {
+        if (_micDevice is null || !_muteMicDuringPlayback)
+        {
+            return;
+        }
+
+        try
+        {
+            _micDevice.AudioEndpointVolume.Mute = _micWasMuted;
+        }
+        catch
+        {
+            // ignored
+        }
+        finally
+        {
+            _micDevice.Dispose();
+            _micDevice = null;
+            _muteMicDuringPlayback = false;
+        }
     }
 
     private void HandlePlaybackStopped(object? sender, StoppedEventArgs e)
     {
+        RestoreMic();
         DisposePlaybackResources();
     }
 
     private void PlaySource(MMDevice outputDevice, IWaveProvider source)
     {
         _outputDevice = new WasapiOut(outputDevice, AudioClientShareMode.Shared, useEventSync: false, latency: 50);
-
         _outputDevice.PlaybackStopped += HandlePlaybackStopped;
         _outputDevice.Init(source);
         _outputDevice.Play();
@@ -182,22 +232,16 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
         PlaySource(outputDevice, source.ToWaveProvider16());
     }
 
-    private static void ValidateSegment(string filePath, TimeSpan start, TimeSpan end)
+    private MMDevice ResolveOutputDevice(MMDeviceEnumerator enumerator)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
+        var endpoints = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+
+        if (_selectedOutputDeviceNumber.HasValue)
         {
-            throw new ArgumentException("Le chemin du fichier audio ne peut pas etre vide.", nameof(filePath));
+            return endpoints[_selectedOutputDeviceNumber.Value];
         }
 
-        if (!File.Exists(filePath))
-        {
-            throw new FileNotFoundException("Le fichier audio est introuvable.", filePath);
-        }
-
-        if (start < TimeSpan.Zero || end <= start)
-        {
-            throw new ArgumentException("La plage audio selectionnee est invalide.");
-        }
+        return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
     }
 
     private void DisposePlaybackResources()
@@ -213,15 +257,26 @@ public sealed class AudioPlaybackService : ISoundPlaybackService, IDisposable
         _audioFileReader = null;
     }
 
-    private MMDevice ResolveOutputDevice(MMDeviceEnumerator enumerator)
+    private static void ValidateFilePath(string filePath)
     {
-        var endpoints = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-
-        if (_selectedOutputDeviceNumber.HasValue)
+        if (string.IsNullOrWhiteSpace(filePath))
         {
-            return endpoints[_selectedOutputDeviceNumber.Value];
+            throw new ArgumentException("Le chemin du fichier audio ne peut pas etre vide.", nameof(filePath));
         }
 
-        return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException("Le fichier audio est introuvable.", filePath);
+        }
+    }
+
+    private static void ValidateSegment(string filePath, TimeSpan start, TimeSpan end)
+    {
+        ValidateFilePath(filePath);
+
+        if (start < TimeSpan.Zero || end <= start)
+        {
+            throw new ArgumentException("La plage audio selectionnee est invalide.");
+        }
     }
 }

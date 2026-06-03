@@ -18,5 +18,6 @@ public sealed class AssignHotkeyUseCase
             ?? throw new InvalidOperationException("La soundboard demandee est introuvable.");
 
         soundboard.AssignHotkey(soundId, new Hotkey(hotkey));
+        _repository.Update(soundboard);
     }
 }

@@ -1,311 +1,489 @@
-﻿<Window x:Class="DMsound.UI.Wpf.MainWindow"
+<Window x:Class="DMsound.UI.Wpf.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:DMsound.UI.Wpf"
     mc:Ignorable="d"
-    Title="DMsound - Soundboard" Height="640" Width="1100"
-    Background="#0F172A"
-    Foreground="#E2E8F0"
+    Title="DMsound — Soundboard System"
+    Height="680" Width="1140"
+    MinHeight="560" MinWidth="900"
+    Background="{StaticResource BrushBgBase}"
+    Foreground="{StaticResource BrushTextSecondary}"
     KeyDown="OnWindowKeyDown"
     AllowDrop="True"
     Drop="OnWindowDrop">
-    <Grid Margin="24">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/CyberTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <!-- Ligne laser top de la fenêtre -->
+    <Window.Template>
+        <ControlTemplate TargetType="Window">
+            <Border Background="{StaticResource BrushBgBase}"
+                    BorderThickness="0"
+                    SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Ligne laser -->
+                    <Rectangle Grid.Row="0">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="Transparent"  Offset="0.0" />
+                                <GradientStop Color="#FF00AAFF"    Offset="0.3" />
+                                <GradientStop Color="#FF00D4FF"    Offset="0.5" />
+                                <GradientStop Color="#FF00AAFF"    Offset="0.7" />
+                                <GradientStop Color="Transparent"  Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+
+                    <AdornerDecorator Grid.Row="1">
+                        <ContentPresenter />
+                    </AdornerDecorator>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+    </Window.Template>
+
+    <Grid Margin="20,16,20,16">
         <Grid.RowDefinitions>
+            <!-- Header -->
             <RowDefinition Height="Auto" />
+            <!-- Toolbar -->
             <RowDefinition Height="Auto" />
+            <!-- Grille de sons -->
             <RowDefinition Height="*" />
+            <!-- Éditeur audio -->
             <RowDefinition Height="Auto" />
+            <!-- Status bar -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="DMsound" FontSize="34" FontWeight="Bold" />
-            <TextBlock Text="Selectionne une soundboard puis declenche un son." FontSize="15" Opacity="0.8" />
-        </StackPanel>
+        <!-- ═══════════════════════════════════════════
+             HEADER — Logo + statut
+        ═══════════════════════════════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="1" Background="#111827" CornerRadius="14" Padding="16" Margin="0,0,0,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="24" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!-- Logo -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <!-- Icône biseautée -->
+                <Border Width="36" Height="36"
+                        Background="#1A00AAFF"
+                        BorderBrush="{StaticResource BrushBorderAccent}"
+                        BorderThickness="1"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="◈"
+                               FontSize="16"
+                               Foreground="{StaticResource BrushAccent}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Soundboard active" VerticalAlignment="Center" Margin="0,0,12,0" FontWeight="SemiBold" />
-                    <ComboBox Width="260"
-                              ItemsSource="{Binding Soundboards}"
-                              SelectedItem="{Binding SelectedSoundboard}"
-                              DisplayMemberPath="Name"
-                              Background="#1F2937"
-                              Foreground="#E2E8F0"
-                              BorderBrush="#374151" />
-                    <Button Content="Importer"
-                        Click="OnImportAudioClicked"
-                        Margin="12,0,0,0"
-                        Padding="14,6"
-                        Background="#0EA5E9"
-                        Foreground="#0F172A"
-                        BorderBrush="#0284C7"
-                        VerticalAlignment="Center" />
-                    <Button Content="Session"
-                        Click="OnOpenSessionClicked"
-                        Margin="12,0,0,0"
-                        Padding="14,6"
-                        Background="#22C55E"
-                        Foreground="#0F172A"
-                        BorderBrush="#15803D"
-                        VerticalAlignment="Center" />
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="DM"
+                                   Style="{StaticResource TextTitle}" />
+                        <TextBlock Text="sound"
+                                   Style="{StaticResource TextTitle}"
+                                   Foreground="{StaticResource BrushAccent}" />
+                    </StackPanel>
+                    <TextBlock Text="SOUNDBOARD SYSTEM V2"
+                               Style="{StaticResource TextSub}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Statut système -->
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <Ellipse Width="7" Height="7"
+                         Fill="#FF00FF88"
+                         Margin="0,0,8,0"
+                         VerticalAlignment="Center" />
+                <TextBlock Text="SYSTÈME ACTIF"
+                           Style="{StaticResource TextLabel}"
+                           Foreground="#FF00FF88" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════
+             TOOLBAR — Soundboard + Import + Session + Sortie
+        ═══════════════════════════════════════════ -->
+        <Border Grid.Row="1"
+                Style="{StaticResource PanelToolbar}"
+                BorderThickness="2,1,1,1"
+                BorderBrush="{StaticResource BrushBorderAccent}"
+                Margin="0,0,0,14">
+            <DockPanel>
+
+                <!-- Actions -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="IMPORTER"
+                            Style="{StaticResource BtnPrimary}"
+                            Click="OnImportAudioClicked"
+                            Margin="0,0,8,0" />
+                    <Button Content="SESSION"
+                            Style="{StaticResource BtnSession}"
+                            Click="OnOpenSessionClicked" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Sortie audio" VerticalAlignment="Center" Margin="0,0,12,0" FontWeight="SemiBold" />
-                    <ComboBox Width="320"
+                <!-- Séparateur -->
+                <Rectangle Width="1" Height="22" Fill="{StaticResource BrushBorderDefault}"
+                           Margin="16,0" VerticalAlignment="Center" />
+
+                <!-- Sortie audio -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="SORTIE //"
+                               Style="{StaticResource TextLabel}"
+                               Margin="0,0,12,0" />
+                    <ComboBox Style="{StaticResource CyberComboBox}"
+                              Width="280"
                               ItemsSource="{Binding AudioOutputDevices}"
                               SelectedItem="{Binding SelectedAudioOutputDevice}"
-                              DisplayMemberPath="Name"
-                              Background="#1F2937"
-                              Foreground="#E2E8F0"
-                              BorderBrush="#374151" />
+                              DisplayMemberPath="Name" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="3"
-                           Text="{Binding StatusMessage}"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Opacity="0.85" />
+            </DockPanel>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════
+             GRILLE DE SONS
+        ═══════════════════════════════════════════ -->
+        <Border Grid.Row="2"
+                Style="{StaticResource PanelMain}"
+                Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Label section -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="SONS DISPONIBLES"
+                               Style="{StaticResource TextLabel}"
+                               DockPanel.Dock="Left"
+                               Margin="0,0,10,0" />
+                    <Rectangle Height="1"
+                               VerticalAlignment="Center">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#FF1A3A5A" Offset="0" />
+                                <GradientStop Color="Transparent" Offset="1" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </DockPanel>
+
+                <!-- Liste des sons -->
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource CyberScrollViewer}">
+                    <ItemsControl ItemsSource="{Binding Sounds}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource CardSound}"
+                                        Width="190"
+                                        Margin="0,0,10,10">
+                                    <Border.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick"
+                                                      Command="{Binding PlayCommand}" />
+                                    </Border.InputBindings>
+                                    <StackPanel>
+
+                                        <!-- Nom du son -->
+                                        <TextBlock Text="{Binding Name}"
+                                                   Style="{StaticResource TextSoundName}"
+                                                   Margin="0,0,0,4" />
+
+                                        <!-- Badge hotkey -->
+                                        <Border Style="{StaticResource BadgeHotkey}"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Hotkey, TargetNullValue='—'}"
+                                                       Style="{StaticResource TextMono}" />
+                                        </Border>
+
+                                        <!-- Actions hotkey -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0"
+                                                     Style="{StaticResource CyberTextBoxMono}"
+                                                     Text="{Binding HotkeyDraft, UpdateSourceTrigger=PropertyChanged}"
+                                                     MaxLength="3"
+                                                     Height="26"
+                                                     ToolTip="Touche clavier" />
+                                            <Button Grid.Column="2"
+                                                    Content="ASSIGNER"
+                                                    Style="{StaticResource BtnMini}"
+                                                    Command="{Binding AssignHotkeyCommand}" />
+                                            <Button Grid.Column="4"
+                                                    Content="ÉDITER"
+                                                    Style="{StaticResource BtnMini}"
+                                                    Command="{Binding SelectCommand}"
+                                                    Foreground="{StaticResource BrushAccent}" />
+                                        </Grid>
+
+
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
             </Grid>
         </Border>
 
-        <Border Grid.Row="2" Background="#111827" CornerRadius="18" Padding="20">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Sounds}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Command="{Binding PlayCommand}"
-                                    Margin="0,0,14,14"
-                                    Padding="18"
-                                    Background="#1E293B"
-                                    BorderBrush="#334155"
-                                    Foreground="#F8FAFC"
-                                    MinWidth="180"
-                                    MinHeight="92">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Hotkey, StringFormat=Touche : {0}}"
-                                               Margin="0,8,0,0"
-                                               Opacity="0.78" />
-                                    <DockPanel Margin="0,10,0,0">
-                                        <TextBox Width="70"
-                                                 Text="{Binding HotkeyDraft, UpdateSourceTrigger=PropertyChanged}"
-                                                 Background="#334155"
-                                                 Foreground="#F8FAFC"
-                                                 BorderBrush="#475569"
-                                                 MaxLength="3" />
-                                        <Button Content="Assigner"
-                                                Command="{Binding AssignHotkeyCommand}"
-                                                Margin="8,0,0,0"
-                                                Padding="10,4"
-                                                Background="#0EA5E9"
-                                                Foreground="#0F172A"
-                                                BorderBrush="#0284C7" />
-                                        <Button Content="Editer"
-                                                Command="{Binding SelectCommand}"
-                                                Margin="8,0,0,0"
-                                                Padding="10,4"
-                                                Background="#14B8A6"
-                                                Foreground="#0F172A"
-                                                BorderBrush="#0F766E" />
-                                    </DockPanel>
-                                </StackPanel>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Border>
-
+        <!-- ═══════════════════════════════════════════
+             ÉDITEUR AUDIO
+        ═══════════════════════════════════════════ -->
         <Border Grid.Row="3"
-                Background="#111827"
-                CornerRadius="18"
-                Padding="20"
-                Margin="0,16,0,0"
+                Style="{StaticResource PanelAccentLeft}"
+                Margin="0,0,0,10"
                 Visibility="{Binding EditorVisibility}">
             <StackPanel>
-                <DockPanel>
-                    <TextBlock Text="Editeur audio" FontSize="20" FontWeight="SemiBold" />
-                    <Button Content="Fermer"
-                            Command="{Binding CloseEditorCommand}"
-                            DockPanel.Dock="Right"
-                            Padding="10,4"
-                            Background="#475569"
-                            Foreground="#F8FAFC"
-                            BorderBrush="#334155" />
+
+                <!-- En-tête éditeur -->
+                <DockPanel Margin="0,0,0,12">
+                    <TextBlock Text="// ÉDITEUR AUDIO"
+                               Style="{StaticResource TextLabel}"
+                               Foreground="{StaticResource BrushAccent}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               DockPanel.Dock="Left" />
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Content="✕  FERMER"
+                                Style="{StaticResource BtnGhost}"
+                                Command="{Binding CloseEditorCommand}"
+                                VerticalAlignment="Center" />
+                    </StackPanel>
+
                 </DockPanel>
 
-                <TextBlock Text="{Binding SelectedSoundEditor.Name}" Margin="0,6,0,0" Opacity="0.8" />
-                <TextBlock Text="{Binding SelectedSoundEditor.FilePath}" Margin="0,2,0,2" Opacity="0.6" FontSize="12" />
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                    <TextBlock Text="Version modifiee: " Opacity="0.6" FontSize="12" />
-                    <TextBlock Text="{Binding EditableFilePath}" Opacity="0.6" FontSize="12" />
-                </StackPanel>
+                <!-- Renommer le son en cours d'édition -->
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="NOM //"
+                               Style="{StaticResource TextLabel}"
+                               Margin="0,0,12,0" />
+                    <TextBox Grid.Column="1"
+                             Style="{StaticResource CyberTextBox}"
+                             Text="{Binding ActiveSoundNameDraft, UpdateSourceTrigger=PropertyChanged}"
+                             Height="28" />
+                    <Button Grid.Column="3"
+                            Content="RENOMMER"
+                            Style="{StaticResource BtnPrimary}"
+                            Padding="12,5"
+                            Click="OnRenameSoundClicked" />
+                </Grid>
 
-                <Border Background="#0B1220" CornerRadius="12" Padding="14" Margin="0,0,0,14">
+                <!-- ONDE ORIGINALE -->
+                <TextBlock Text="ONDE ORIGINALE"
+                           Style="{StaticResource TextLabel}"
+                           Margin="0,0,0,6" />
+
+                <Border Style="{StaticResource PanelWave}" Margin="0,0,0,12">
                     <StackPanel>
-                        <TextBlock Text="Onde originale" FontWeight="SemiBold" />
-
-                        <Grid Width="{Binding WaveformCanvasWidthPixelsValue}" Height="90" Margin="0,8,0,8">
+                        <Grid Width="{Binding WaveformCanvasWidthPixelsValue}" Height="72" Margin="0,0,0,10">
                             <ItemsControl ItemsSource="{Binding OriginalWaveformPeaks}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <WrapPanel Height="90" VerticalAlignment="Bottom" />
+                                        <WrapPanel Height="72" VerticalAlignment="Bottom" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Rectangle Width="4"
-                                                   Height="{Binding}"
-                                                   Fill="#38BDF8"
+                                        <Rectangle Width="3" Height="{Binding}"
+                                                   Fill="#FF0066AA"
                                                    Margin="1,0"
                                                    VerticalAlignment="Bottom" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
                             <Canvas IsHitTestVisible="False">
-                                <Rectangle Width="2"
-                                           Height="90"
-                                           Fill="#EF4444"
+                                <Rectangle Width="2" Height="72" Fill="#FFEF4444"
                                            Canvas.Left="{Binding OriginalWaveformCursorX}" />
                             </Canvas>
                         </Grid>
 
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Marker rouge" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <Slider Width="260"
+                        <DockPanel>
+                            <TextBlock Text="MARKER"
+                                       Style="{StaticResource TextLabel}"
+                                       Margin="0,0,10,0" />
+                            <Slider Style="{StaticResource CyberSlider}"
+                                    Width="220"
                                     Minimum="0"
                                     Maximum="{Binding OriginalDurationSeconds}"
                                     Value="{Binding OriginalMarkerSeconds, UpdateSourceTrigger=PropertyChanged}"
-                                    Foreground="#EF4444"
-                                    Background="#1F2937" />
-                            <TextBlock Text="{Binding OriginalMarkerSeconds, StringFormat={}{0:F2}s}" Margin="8,0,0,0" Foreground="#FCA5A5" VerticalAlignment="Center" />
-                            <Button Content="Lancer" Command="{Binding PlayOriginalCommand}" Margin="12,0,0,0" Padding="10,4" Background="#0EA5E9" Foreground="#0F172A" BorderBrush="#0284C7" />
-                            <Button Content="Stop" Command="{Binding StopPlaybackCommand}" Margin="8,0,0,0" Padding="10,4" Background="#334155" Foreground="#F8FAFC" BorderBrush="#1E293B" />
-                            <Button Content="Retour" Command="{Binding ResetOriginalMarkerCommand}" Margin="8,0,0,0" Padding="10,4" Background="#991B1B" Foreground="#FEE2E2" BorderBrush="#7F1D1D" />
-                        </StackPanel>
+                                    VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding OriginalMarkerSeconds, StringFormat={}{0:F2}s}"
+                                       Style="{StaticResource TextMono}"
+                                       Margin="8,0,16,0"
+                                       Foreground="#FFFCA5A5" />
+                            <Button Content="▶  LANCER"  Style="{StaticResource BtnPrimary}"  Command="{Binding PlayOriginalCommand}"   Margin="0,0,6,0" Padding="12,5" />
+                            <Button Content="■  STOP"    Style="{StaticResource BtnGhost}"    Command="{Binding StopPlaybackCommand}"  Margin="0,0,6,0" Padding="12,5" />
+                            <Button Content="↺  RETOUR"  Style="{StaticResource BtnDanger}"   Command="{Binding ResetOriginalMarkerCommand}" Padding="12,5" />
+                        </DockPanel>
                     </StackPanel>
                 </Border>
 
-                <Border Background="#0B1220" CornerRadius="12" Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="Onde modifiee" FontWeight="SemiBold" />
+                <!-- ONDE MODIFIÉE -->
+                <TextBlock Text="ONDE MODIFIÉE"
+                           Style="{StaticResource TextLabel}"
+                           Margin="0,0,0,6" />
 
-                        <Grid Width="{Binding WaveformCanvasWidthPixelsValue}" Height="90" Margin="0,8,0,8">
+                <Border Style="{StaticResource PanelWave}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <Grid Width="{Binding WaveformCanvasWidthPixelsValue}" Height="72" Margin="0,0,0,10">
                             <ItemsControl ItemsSource="{Binding EditableWaveformPeaks}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <WrapPanel Height="90" VerticalAlignment="Bottom" />
+                                        <WrapPanel Height="72" VerticalAlignment="Bottom" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Rectangle Width="4"
-                                                   Height="{Binding}"
-                                                   Fill="#22D3EE"
+                                        <Rectangle Width="3" Height="{Binding}"
+                                                   Fill="#FF0A4A7A"
                                                    Margin="1,0"
                                                    VerticalAlignment="Bottom" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
                             <Canvas IsHitTestVisible="False">
-                                <Rectangle Width="2"
-                                           Height="90"
-                                           Fill="#FFFFFF"
+                                <Rectangle Width="2" Height="72" Fill="#FFFFFFFF"
                                            Canvas.Left="{Binding EditableSelectionStartCursorX}" />
-                                <Rectangle Width="2"
-                                           Height="90"
-                                           Fill="#FFFFFF"
+                                <Rectangle Width="2" Height="72" Fill="#FFFFFFFF"
                                            Canvas.Left="{Binding EditableSelectionEndCursorX}" />
-                                <Rectangle Width="2"
-                                           Height="90"
-                                           Fill="#EF4444"
+                                <Rectangle Width="2" Height="72" Fill="#FFEF4444"
                                            Canvas.Left="{Binding EditableWaveformCursorX}" />
                             </Canvas>
                         </Grid>
 
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Marker rouge" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <Slider Width="220"
+                        <!-- Marker modifié -->
+                        <DockPanel Margin="0,0,0,8">
+                            <TextBlock Text="MARKER"
+                                       Style="{StaticResource TextLabel}"
+                                       Margin="0,0,10,0" />
+                            <Slider Style="{StaticResource CyberSlider}"
+                                    Width="180"
                                     Minimum="0"
                                     Maximum="{Binding EditableDurationSeconds}"
                                     Value="{Binding EditableMarkerSeconds, UpdateSourceTrigger=PropertyChanged}"
-                                    Foreground="#EF4444"
-                                    Background="#1F2937" />
-                            <TextBlock Text="{Binding EditableMarkerSeconds, StringFormat={}{0:F2}s}" Margin="8,0,0,0" Foreground="#FCA5A5" VerticalAlignment="Center" />
-                            <Button Content="Lancer" Command="{Binding PlayEditedCommand}" Margin="12,0,0,0" Padding="10,4" Background="#14B8A6" Foreground="#0F172A" BorderBrush="#0F766E" />
-                            <Button Content="Stop" Command="{Binding StopPlaybackCommand}" Margin="8,0,0,0" Padding="10,4" Background="#334155" Foreground="#F8FAFC" BorderBrush="#1E293B" />
-                            <Button Content="Retour" Command="{Binding ResetEditedMarkerCommand}" Margin="8,0,0,0" Padding="10,4" Background="#991B1B" Foreground="#FEE2E2" BorderBrush="#7F1D1D" />
-                        </StackPanel>
+                                    VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding EditableMarkerSeconds, StringFormat={}{0:F2}s}"
+                                       Style="{StaticResource TextMono}"
+                                       Margin="8,0,16,0"
+                                       Foreground="#FFFCA5A5" />
+                            <Button Content="▶  LANCER"  Style="{StaticResource BtnPrimary}"  Command="{Binding PlayEditedCommand}"        Margin="0,0,6,0" Padding="12,5" />
+                            <Button Content="■  STOP"    Style="{StaticResource BtnGhost}"    Command="{Binding StopPlaybackCommand}"      Margin="0,0,6,0" Padding="12,5" />
+                            <Button Content="↺  RETOUR"  Style="{StaticResource BtnDanger}"   Command="{Binding ResetEditedMarkerCommand}" Padding="12,5" />
+                        </DockPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Barre debut" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <Slider Width="200"
+                        <!-- Sélection début / fin -->
+                        <DockPanel Margin="0,0,0,10">
+                            <TextBlock Text="DÉBUT"
+                                       Style="{StaticResource TextLabel}"
+                                       Margin="0,0,10,0" />
+                            <Slider Style="{StaticResource CyberSlider}"
+                                    Width="160"
                                     Minimum="0"
                                     Maximum="{Binding EditableDurationSeconds}"
                                     Value="{Binding SelectionStartSeconds, UpdateSourceTrigger=PropertyChanged}"
-                                    Foreground="#F59E0B"
-                                    Background="#1F2937" />
-                            <TextBlock Text="{Binding SelectionStartSeconds, StringFormat={}{0:F2}s}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                            <TextBlock Text="Barre fin" VerticalAlignment="Center" Margin="16,0,8,0" />
-                            <Slider Width="200"
+                                    VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding SelectionStartSeconds, StringFormat={}{0:F2}s}"
+                                       Style="{StaticResource TextMono}"
+                                       Margin="8,0,20,0" />
+                            <TextBlock Text="FIN"
+                                       Style="{StaticResource TextLabel}"
+                                       Margin="0,0,10,0" />
+                            <Slider Style="{StaticResource CyberSlider}"
+                                    Width="160"
                                     Minimum="0"
                                     Maximum="{Binding EditableDurationSeconds}"
                                     Value="{Binding SelectionEndSeconds, UpdateSourceTrigger=PropertyChanged}"
-                                    Foreground="#A78BFA"
-                                    Background="#1F2937" />
-                            <TextBlock Text="{Binding SelectionEndSeconds, StringFormat={}{0:F2}s}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding SelectionEndSeconds, StringFormat={}{0:F2}s}"
+                                       Style="{StaticResource TextMono}"
+                                       Margin="8,0,0,0" />
+                        </DockPanel>
+
+                        <!-- Actions découpage -->
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="✂  DÉCOUPER"
+                                    Style="{StaticResource BtnTrim}"
+                                    Command="{Binding TrimSelectionCommand}"
+                                    Padding="14,6"
+                                    Margin="0,0,8,0" />
+                            <Button Content="↺  RÉINITIALISER"
+                                    Style="{StaticResource BtnDanger}"
+                                    Command="{Binding ResetEditedSoundCommand}"
+                                    Padding="14,6"
+                                    Margin="0,0,8,0" />
+                            <Button Content="✓  SAUVEGARDER"
+                                    Style="{StaticResource BtnSave}"
+                                    Command="{Binding SaveTrimmedCommand}"
+                                    Padding="14,6" />
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button Content="Decouper"
-                                    Command="{Binding TrimSelectionCommand}"
-                                    Padding="12,5"
-                                    Background="#F59E0B"
-                                    Foreground="#0F172A"
-                                    BorderBrush="#B45309" />
-                            <Button Content="Reinitialiser"
-                                Command="{Binding ResetEditedSoundCommand}"
-                                Margin="8,0,0,0"
-                                Padding="12,5"
-                                Background="#F97316"
-                                Foreground="#0F172A"
-                                BorderBrush="#C2410C" />
-                            <Button Content="Sauvegarder"
-                                    Command="{Binding SaveTrimmedCommand}"
-                                    Margin="8,0,0,0"
-                                    Padding="12,5"
-                                    Background="#22C55E"
-                                    Foreground="#052E16"
-                                    BorderBrush="#15803D" />
-                        </StackPanel>
                     </StackPanel>
                 </Border>
+
             </StackPanel>
         </Border>
 
-        <TextBlock Grid.Row="4"
-                   Margin="0,16,0,0"
-                   Text="Feature 3: waveform, pre-ecoute et decoupage audio"
-                   Opacity="0.55"
-                   HorizontalAlignment="Right" />
+        <!-- ═══════════════════════════════════════════
+             STATUS BAR
+        ═══════════════════════════════════════════ -->
+        <Border Grid.Row="4"
+                Style="{StaticResource PanelStatusBar}">
+            <DockPanel>
+                <TextBlock Text="◈"
+                           Foreground="{StaticResource BrushAccent}"
+                           FontSize="12"
+                           Margin="0,0,10,0"
+                           VerticalAlignment="Center" />
+                <TextBlock Text="STATUS"
+                           Style="{StaticResource TextLabel}"
+                           Margin="0,0,14,0" />
+                <TextBlock Text="{Binding StatusMessage}"
+                           Style="{StaticResource TextStatus}" />
+            </DockPanel>
+        </Border>
+
     </Grid>
 </Window>

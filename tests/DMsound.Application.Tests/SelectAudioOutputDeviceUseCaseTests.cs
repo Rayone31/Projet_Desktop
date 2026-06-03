@@ -39,6 +39,10 @@ public sealed class SelectAudioOutputDeviceUseCaseTests
             {
             }
 
+        public void Play(string filePath, bool muteMicDuringPlayback) { }
+
+        public bool IsMicMuteSupported() => false;
+
         public void Play(string filePath)
         {
         }

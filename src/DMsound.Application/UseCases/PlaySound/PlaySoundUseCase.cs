@@ -6,12 +6,12 @@ namespace DMsound.Application.UseCases.PlaySound;
 public sealed class PlaySoundUseCase
 {
     private readonly ISoundboardRepository _repository;
-    private readonly ISoundPlaybackService _soundPlaybackService;
+    private readonly ISoundPlaybackService _playbackService;
 
-    public PlaySoundUseCase(ISoundboardRepository repository, ISoundPlaybackService soundPlaybackService)
+    public PlaySoundUseCase(ISoundboardRepository repository, ISoundPlaybackService playbackService)
     {
         _repository = repository;
-        _soundPlaybackService = soundPlaybackService;
+        _playbackService = playbackService;
     }
 
     public void Execute(SoundboardId soundboardId, SoundId soundId)
@@ -19,9 +19,7 @@ public sealed class PlaySoundUseCase
         var soundboard = _repository.GetById(soundboardId)
             ?? throw new InvalidOperationException("La soundboard demandee est introuvable.");
 
-        var sound = soundboard.Sounds.FirstOrDefault(item => item.Id == soundId)
-            ?? throw new InvalidOperationException("Le son demande est introuvable.");
-
-        _soundPlaybackService.Play(sound.FilePath);
+        var sound = soundboard.GetSoundById(soundId);
+        _playbackService.Play(sound.ModifiedFilePath, muteMicDuringPlayback: true);
     }
 }

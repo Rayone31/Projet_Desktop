@@ -12,8 +12,11 @@ using DMsound.Application.UseCases.ResetSoundToOriginal;
 using DMsound.Application.UseCases.SaveTrimmedSound;
 using DMsound.Application.UseCases.StopSoundPlayback;
 using DMsound.Application.UseCases.TrimSoundSelection;
+using DMsound.Application.UseCases.RenameSoundboard;
+using DMsound.Application.UseCases.RenameSound;
 using DMsound.Application.UseCases.SelectAudioOutputDevice;
 using DMsound.Infrastructure.Audio;
+using DMsound.Infrastructure.Persistence;
 using DMsound.UI.Wpf.Presentation;
 
 namespace DMsound.UI.Wpf.Infrastructure;
@@ -22,11 +25,12 @@ internal static class DemoBootstrapper
 {
     public static MainWindowViewModel CreateMainWindowViewModel()
     {
-        var repository = DemoSoundboardRepository.Create();
+        var repository = FileSystemSoundboardRepository.Create();
+        var audioLibraryStorage = new AudioLibraryStorage();
         var playbackService = new AudioPlaybackService();
         var listVisibleSoundboardsUseCase = new ListVisibleSoundboardsUseCase(repository);
         var getSoundboardDetailsUseCase = new GetSoundboardDetailsUseCase(repository);
-        var importSoundsUseCase = new ImportSoundsUseCase(repository);
+        var importSoundsUseCase = new ImportSoundsUseCase(repository, audioLibraryStorage);
         var getSoundEditorDetailsUseCase = new GetSoundEditorDetailsUseCase(repository, playbackService);
         var analyzeAudioFileUseCase = new AnalyzeAudioFileUseCase(playbackService);
         var previewSoundSelectionUseCase = new PreviewSoundSelectionUseCase(repository, playbackService);
@@ -39,6 +43,8 @@ internal static class DemoBootstrapper
         var assignHotkeyUseCase = new AssignHotkeyUseCase(repository);
         var playSoundUseCase = new PlaySoundUseCase(repository, playbackService);
         var playSoundByHotkeyUseCase = new PlaySoundByHotkeyUseCase(repository, playbackService);
+        var renameSoundboardUseCase = new RenameSoundboardUseCase(repository);
+        var renameSoundUseCase = new RenameSoundUseCase(repository);
 
         var viewModel = new MainWindowViewModel(
             listVisibleSoundboardsUseCase,
@@ -55,7 +61,9 @@ internal static class DemoBootstrapper
             selectAudioOutputDeviceUseCase,
             assignHotkeyUseCase,
             playSoundUseCase,
-            playSoundByHotkeyUseCase);
+            playSoundByHotkeyUseCase,
+            renameSoundboardUseCase,
+            renameSoundUseCase);
 
         viewModel.Load();
         return viewModel;

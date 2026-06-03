@@ -4,5 +4,9 @@ public interface ISoundPlaybackService : IAudioOutputDeviceService, IAudioEditor
 {
     void Play(string filePath);
 
+    void Play(string filePath, bool muteMicDuringPlayback);
+
     void Stop();
+
+    bool IsMicMuteSupported();
 }

@@ -21,7 +21,7 @@ public sealed class GetSoundboardDetailsUseCaseTests
         Assert.Equal("Gaming", result.Name);
         Assert.Single(result.Sounds);
         Assert.Equal("Kick", result.Sounds[0].Name);
-        Assert.Equal("kick.wav", result.Sounds[0].FilePath);
+        Assert.Equal("A", result.Sounds[0].Hotkey?.Value);
     }
 
     [Fact]
@@ -42,6 +42,11 @@ public sealed class GetSoundboardDetailsUseCaseTests
         public void Add(Soundboard soundboard)
         {
             _items.Add(soundboard);
+        }
+
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
         }
 
         public Soundboard? GetById(SoundboardId id)

@@ -23,7 +23,7 @@ public sealed class TrimSoundSelectionUseCase
         ValidateRange(startSeconds, endSeconds);
 
         return _audioEditorService.TrimSegment(
-            sound.FilePath,
+            sound.ModifiedFilePath,
             TimeSpan.FromSeconds(startSeconds),
             TimeSpan.FromSeconds(endSeconds));
     }

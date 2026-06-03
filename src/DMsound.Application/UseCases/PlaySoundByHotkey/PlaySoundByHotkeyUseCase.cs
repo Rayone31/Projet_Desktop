@@ -27,7 +27,7 @@ public sealed class PlaySoundByHotkeyUseCase
             return false;
         }
 
-        _playbackService.Play(sound.FilePath);
+        _playbackService.Play(sound.ModifiedFilePath, muteMicDuringPlayback: true);
         return true;
     }
 }

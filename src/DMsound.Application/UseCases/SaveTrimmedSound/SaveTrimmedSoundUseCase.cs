@@ -23,6 +23,7 @@ public sealed class SaveTrimmedSoundUseCase
             ?? throw new InvalidOperationException("La soundboard demandee est introuvable.");
 
         var sound = soundboard.GetSoundById(soundId);
-        sound.UpdateFilePath(trimmedFilePath);
+        sound.UpdateModifiedFilePath(trimmedFilePath);
+        _repository.Update(soundboard);
     }
 }

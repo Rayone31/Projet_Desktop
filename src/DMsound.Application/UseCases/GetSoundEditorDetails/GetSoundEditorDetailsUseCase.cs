@@ -23,13 +23,13 @@ public sealed class GetSoundEditorDetailsUseCase
             ?? throw new InvalidOperationException("La soundboard demandee est introuvable.");
 
         var sound = soundboard.GetSoundById(soundId);
-        var waveform = _audioEditorService.AnalyzeWaveform(sound.FilePath, DefaultPeakCount);
+        var waveform = _audioEditorService.AnalyzeWaveform(sound.ModifiedFilePath, DefaultPeakCount);
 
         return new SoundEditorDetails(
             sound.Id,
             sound.Name,
-            sound.OriginalFilePath,
-            sound.FilePath,
+            sound.InitialFilePath,
+            sound.ModifiedFilePath,
             waveform.DurationSeconds,
             waveform.WaveformPeaks);
     }

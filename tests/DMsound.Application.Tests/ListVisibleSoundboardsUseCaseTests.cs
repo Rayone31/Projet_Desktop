@@ -33,6 +33,11 @@ public sealed class ListVisibleSoundboardsUseCaseTests
             _items.Add(soundboard);
         }
 
+        public void Update(Soundboard soundboard)
+        {
+            // No-op for test
+        }
+
         public Soundboard? GetById(SoundboardId id)
         {
             return _items.FirstOrDefault(item => item.Id == id);

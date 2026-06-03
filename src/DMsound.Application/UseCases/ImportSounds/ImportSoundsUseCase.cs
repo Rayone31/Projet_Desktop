@@ -18,10 +18,12 @@ public sealed class ImportSoundsUseCase
     };
 
     private readonly ISoundboardRepository _repository;
+    private readonly IAudioLibraryStorage _audioLibraryStorage;
 
-    public ImportSoundsUseCase(ISoundboardRepository repository)
+    public ImportSoundsUseCase(ISoundboardRepository repository, IAudioLibraryStorage audioLibraryStorage)
     {
         _repository = repository;
+        _audioLibraryStorage = audioLibraryStorage;
     }
 
     public IReadOnlyList<SoundSummary> Execute(SoundboardId soundboardId, IEnumerable<string> filePaths)
@@ -35,15 +37,17 @@ public sealed class ImportSoundsUseCase
         {
             ValidateAudioFile(filePath);
 
+            var storedFilePath = _audioLibraryStorage.StoreOriginal(filePath);
             var sound = new Sound(
                 SoundId.New(),
                 Path.GetFileNameWithoutExtension(filePath),
-                filePath);
+                storedFilePath);
 
             soundboard.AddSound(sound);
-            importedSounds.Add(new SoundSummary(sound.Id, sound.Name, sound.FilePath, sound.Hotkey));
+            importedSounds.Add(new SoundSummary(sound.Id, sound.Name, sound.Hotkey));
         }
 
+        _repository.Update(soundboard);
         return importedSounds;
     }
 
