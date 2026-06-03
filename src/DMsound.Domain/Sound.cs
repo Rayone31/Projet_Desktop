@@ -2,13 +2,14 @@ namespace DMsound.Domain;
 
 public sealed class Sound
 {
-    public Sound(SoundId id, string name, string initialFilePath, Hotkey? hotkey = null)
+    public Sound(SoundId id, string name, string initialFilePath, Hotkey? hotkey = null, bool isEnabled = true)
     {
         Id = id;
         Name = ValidateText(name, nameof(name));
         InitialFilePath = ValidateText(initialFilePath, nameof(initialFilePath));
         ModifiedFilePath = InitialFilePath;
         Hotkey = hotkey;
+        IsEnabled = isEnabled;
     }
 
     public SoundId Id { get; }
@@ -20,6 +21,8 @@ public sealed class Sound
     public string ModifiedFilePath { get; private set; }
 
     public Hotkey? Hotkey { get; private set; }
+
+    public bool IsEnabled { get; private set; }
 
     public bool HasModification =>
         !string.Equals(InitialFilePath, ModifiedFilePath, StringComparison.OrdinalIgnoreCase);
@@ -37,6 +40,16 @@ public sealed class Sound
     public void ClearHotkey()
     {
         Hotkey = null;
+    }
+
+    public void Enable()
+    {
+        IsEnabled = true;
+    }
+
+    public void Disable()
+    {
+        IsEnabled = false;
     }
 
     public void UpdateModifiedFilePath(string filePath)

@@ -9,23 +9,32 @@ internal sealed class SoundItemViewModel : ObservableObject
     private string _hotkeyDraft;
     private string _nameDraft;
 
+    private bool _isCapturing;
+    private bool _isEnabled;
+
     public SoundItemViewModel(
         SoundId id,
         string name,
         string? hotkey,
+        bool isEnabled,
         ICommand playCommand,
         ICommand assignHotkeyCommand,
         ICommand selectCommand,
-        ICommand renameSoundCommand)
+        ICommand renameSoundCommand,
+        ICommand startCapturingHotkeyCommand,
+        ICommand toggleEnabledCommand)
     {
         Id = id;
         _name = name;
         _nameDraft = name;
         Hotkey = hotkey;
+        _isEnabled = isEnabled;
         PlayCommand = playCommand;
         AssignHotkeyCommand = assignHotkeyCommand;
         SelectCommand = selectCommand;
         RenameSoundCommand = renameSoundCommand;
+        StartCapturingHotkeyCommand = startCapturingHotkeyCommand;
+        ToggleEnabledCommand = toggleEnabledCommand;
         _hotkeyDraft = hotkey ?? string.Empty;
     }
 
@@ -58,6 +67,28 @@ internal sealed class SoundItemViewModel : ObservableObject
     public ICommand SelectCommand { get; }
 
     public ICommand RenameSoundCommand { get; }
+
+    public ICommand StartCapturingHotkeyCommand { get; }
+
+    public ICommand ToggleEnabledCommand { get; }
+
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => SetProperty(ref _isEnabled, value);
+    }
+
+    public bool IsCapturing
+    {
+        get => _isCapturing;
+        set
+        {
+            if (SetProperty(ref _isCapturing, value))
+            {
+                HotkeyDraft = value ? "Appuyez..." : (Hotkey ?? string.Empty);
+            }
+        }
+    }
 
     public void UpdateHotkey(string? hotkey)
     {

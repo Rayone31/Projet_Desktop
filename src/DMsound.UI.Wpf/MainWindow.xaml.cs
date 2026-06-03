@@ -18,9 +18,11 @@ public partial class MainWindow : Window
 
         _globalHotkeyService = new GlobalHotkeyService();
         _globalHotkeyService.HotkeyPressed += OnGlobalHotkeyPressed;
+        _globalHotkeyService.KeyCaptured += OnKeyCaptured;
 
         _viewModel.HotkeyRegistrationRequested += OnHotkeyRegistrationRequested;
         _viewModel.HotkeyUnregistrationRequested += OnHotkeyUnregistrationRequested;
+        _viewModel.HotkeyCaptureStarted += OnHotkeyCaptureStarted;
 
         Loaded += OnWindowLoaded;
         Closed += OnWindowClosed;
@@ -29,7 +31,6 @@ public partial class MainWindow : Window
     private void OnWindowLoaded(object sender, RoutedEventArgs e)
     {
         _globalHotkeyService.Attach(this);
-        _viewModel.RegisterAllHotkeys();
     }
 
     private void OnWindowClosed(object? sender, EventArgs e)
@@ -40,6 +41,16 @@ public partial class MainWindow : Window
     private void OnGlobalHotkeyPressed(string keyText)
     {
         _viewModel.HandleKeyPress(keyText);
+    }
+
+    private void OnKeyCaptured(string keyText)
+    {
+        _viewModel.TryCaptureHotkey(keyText);
+    }
+
+    private void OnHotkeyCaptureStarted()
+    {
+        _globalHotkeyService.StartCapture();
     }
 
     private void OnHotkeyRegistrationRequested(string keyText)

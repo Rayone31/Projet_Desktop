@@ -211,10 +211,60 @@
                                     </Border.InputBindings>
                                     <StackPanel>
 
-                                        <!-- Nom du son -->
-                                        <TextBlock Text="{Binding Name}"
-                                                   Style="{StaticResource TextSoundName}"
-                                                   Margin="0,0,0,4" />
+                                        <!-- Nom + toggle -->
+                                        <DockPanel Margin="0,0,0,4">
+                                            <Button DockPanel.Dock="Right"
+                                                    Command="{Binding ToggleEnabledCommand}"
+                                                    Cursor="Hand"
+                                                    Width="36" Height="20"
+                                                    Padding="0"
+                                                    ToolTip="Activer / Désactiver">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+                                                                <Setter Property="Background" Value="#1A00FF88" />
+                                                                <Setter Property="BorderBrush" Value="#FF00FF88" />
+                                                                <Setter Property="Foreground" Value="#FF00FF88" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                                <Setter Property="Background" Value="Transparent" />
+                                                                <Setter Property="BorderBrush" Value="#FF4A7A9B" />
+                                                                <Setter Property="Foreground" Value="#FF4A7A9B" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                                <TextBlock FontSize="9" FontWeight="Bold"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+                                                                    <Setter Property="Text" Value="ON" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                                    <Setter Property="Text" Value="OFF" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Button>
+                                            <TextBlock Text="{Binding Name}"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource TextSoundName}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                                <Setter Property="Opacity" Value="0.4" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DockPanel>
 
                                         <!-- Badge hotkey -->
                                         <Border Style="{StaticResource BadgeHotkey}"
@@ -226,18 +276,25 @@
                                         <!-- Actions hotkey -->
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="70" />
-                                                <ColumnDefinition Width="6" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="6" />
-                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBox Grid.Column="0"
-                                                     Style="{StaticResource CyberTextBoxMono}"
-                                                     Text="{Binding HotkeyDraft, UpdateSourceTrigger=PropertyChanged}"
-                                                     MaxLength="3"
-                                                     Height="26"
-                                                     ToolTip="Touche clavier" />
+                                            <Border Grid.Column="0"
+                                                    Style="{StaticResource BadgeHotkey}"
+                                                    Margin="0"
+                                                    Cursor="Hand"
+                                                    ToolTip="Cliquez puis appuyez sur une touche">
+                                                <Border.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick"
+                                                                  Command="{Binding StartCapturingHotkeyCommand}" />
+                                                </Border.InputBindings>
+                                                <TextBlock Style="{StaticResource TextMono}"
+                                                           HorizontalAlignment="Center"
+                                                           Text="{Binding HotkeyDraft}" />
+                                            </Border>
                                             <Button Grid.Column="2"
                                                     Content="ASSIGNER"
                                                     Style="{StaticResource BtnMini}"

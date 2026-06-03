@@ -19,6 +19,7 @@ using DMsound.Application.UseCases.SaveTrimmedSound;
 using DMsound.Application.UseCases.SelectAudioOutputDevice;
 using DMsound.Application.UseCases.StopSoundPlayback;
 using DMsound.Application.UseCases.TrimSoundSelection;
+using DMsound.Application.UseCases.ToggleSound;
 using DMsound.Domain;
 
 namespace DMsound.UI.Wpf.Presentation;
@@ -44,6 +45,7 @@ internal sealed class MainWindowViewModel : ObservableObject
     private readonly PlaySoundByHotkeyUseCase _playSoundByHotkeyUseCase;
     private readonly RenameSoundboardUseCase _renameSoundboardUseCase;
     private readonly RenameSoundUseCase _renameSoundUseCase;
+    private readonly ToggleSoundUseCase _toggleSoundUseCase;
 
     private SoundboardItemViewModel? _selectedSoundboard;
     private AudioOutputDeviceItemViewModel? _selectedAudioOutputDevice;
@@ -63,6 +65,7 @@ internal sealed class MainWindowViewModel : ObservableObject
     private string _statusMessage = "Choisis une soundboard.";
     private string _soundboardNameDraft = string.Empty;
     private string _activeSoundNameDraft = string.Empty;
+    private SoundItemViewModel? _capturingSoundVm;
 
     private readonly DispatcherTimer _playbackCursorTimer;
     private DateTime _playbackCursorStartUtc;
@@ -71,7 +74,10 @@ internal sealed class MainWindowViewModel : ObservableObject
     private bool _playbackCursorForOriginalWaveform;
 
     public event Action<string>? HotkeyRegistrationRequested;
+    public event Action? HotkeyCaptureStarted;
     public event Action<string>? HotkeyUnregistrationRequested;
+
+    public bool IsCapturingHotkey => _capturingSoundVm is not null;
 
     public MainWindowViewModel(
         ListVisibleSoundboardsUseCase listVisibleSoundboardsUseCase,
@@ -90,7 +96,8 @@ internal sealed class MainWindowViewModel : ObservableObject
         PlaySoundUseCase playSoundUseCase,
         PlaySoundByHotkeyUseCase playSoundByHotkeyUseCase,
         RenameSoundboardUseCase renameSoundboardUseCase,
-        RenameSoundUseCase renameSoundUseCase)
+        RenameSoundUseCase renameSoundUseCase,
+        ToggleSoundUseCase toggleSoundUseCase)
     {
         _listVisibleSoundboardsUseCase = listVisibleSoundboardsUseCase;
         _getSoundboardDetailsUseCase = getSoundboardDetailsUseCase;
@@ -109,6 +116,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         _playSoundByHotkeyUseCase = playSoundByHotkeyUseCase;
         _renameSoundboardUseCase = renameSoundboardUseCase;
         _renameSoundUseCase = renameSoundUseCase;
+        _toggleSoundUseCase = toggleSoundUseCase;
 
         Soundboards = new ObservableCollection<SoundboardItemViewModel>();
         Sounds = new ObservableCollection<SoundItemViewModel>();
@@ -341,6 +349,39 @@ internal sealed class MainWindowViewModel : ObservableObject
         }
     }
 
+    public void StartCapturingHotkey(SoundItemViewModel soundVm)
+    {
+        if (_capturingSoundVm is not null)
+        {
+            _capturingSoundVm.IsCapturing = false;
+        }
+
+        _capturingSoundVm = soundVm;
+        soundVm.IsCapturing = true;
+        HotkeyCaptureStarted?.Invoke();
+        StatusMessage = $"Appuyez sur une touche pour assigner a '{soundVm.Name}'...";
+    }
+
+    public bool TryCaptureHotkey(string keyText)
+    {
+        if (_capturingSoundVm is null)
+        {
+            return false;
+        }
+
+        var vm = _capturingSoundVm;
+        _capturingSoundVm = null;
+        vm.IsCapturing = false;
+        vm.HotkeyDraft = keyText;
+
+        if (SelectedSoundboard is not null)
+        {
+            AssignHotkeyInternal(SelectedSoundboard.Id, vm);
+        }
+
+        return true;
+    }
+
     public void RegisterAllHotkeys()
     {
         foreach (var sound in Sounds)
@@ -521,10 +562,13 @@ internal sealed class MainWindowViewModel : ObservableObject
             sound.Id,
             sound.Name,
             sound.Hotkey?.Value,
+            sound.IsEnabled,
             new RelayCommand(() => PlaySound(soundboardId, sound)),
             new RelayCommand(() => AssignHotkey(soundboardId, vm!.Id)),
             new RelayCommand(() => SelectSoundForEditing(soundboardId, vm!.Id)),
-            new RelayCommand(() => RenameSound(vm!, vm!.NameDraft)));
+            new RelayCommand(() => RenameSound(vm!, vm!.NameDraft)),
+            new RelayCommand(() => StartCapturingHotkey(vm!)),
+            new RelayCommand(() => ToggleSound(soundboardId, vm!)));
         return vm;
     }
 
@@ -805,13 +849,33 @@ internal sealed class MainWindowViewModel : ObservableObject
         SelectedAudioOutputDevice = AudioOutputDevices.FirstOrDefault();
     }
 
+    private void ToggleSound(SoundboardId soundboardId, SoundItemViewModel soundVm)
+    {
+        try
+        {
+            var isEnabled = _toggleSoundUseCase.Execute(soundboardId, soundVm.Id);
+            soundVm.IsEnabled = isEnabled;
+            StatusMessage = isEnabled
+                ? $"'{soundVm.Name}' active."
+                : $"'{soundVm.Name}' desactive.";
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = exception.Message;
+        }
+    }
+
     private void AssignHotkey(SoundboardId soundboardId, SoundId soundId)
     {
         var sound = Sounds.First(item => item.Id == soundId);
+        AssignHotkeyInternal(soundboardId, sound);
+    }
 
+    private void AssignHotkeyInternal(SoundboardId soundboardId, SoundItemViewModel sound)
+    {
         try
         {
-            _assignHotkeyUseCase.Execute(soundboardId, soundId, sound.HotkeyDraft);
+            _assignHotkeyUseCase.Execute(soundboardId, sound.Id, sound.HotkeyDraft);
             var oldHotkey = sound.Hotkey;
             sound.UpdateHotkey(sound.HotkeyDraft.ToUpperInvariant());
 

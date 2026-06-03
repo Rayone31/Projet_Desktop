@@ -14,6 +14,7 @@ using DMsound.Application.UseCases.StopSoundPlayback;
 using DMsound.Application.UseCases.TrimSoundSelection;
 using DMsound.Application.UseCases.RenameSoundboard;
 using DMsound.Application.UseCases.RenameSound;
+using DMsound.Application.UseCases.ToggleSound;
 using DMsound.Application.UseCases.SelectAudioOutputDevice;
 using DMsound.Infrastructure.Audio;
 using DMsound.Infrastructure.Persistence;
@@ -45,6 +46,7 @@ internal static class DemoBootstrapper
         var playSoundByHotkeyUseCase = new PlaySoundByHotkeyUseCase(repository, playbackService);
         var renameSoundboardUseCase = new RenameSoundboardUseCase(repository);
         var renameSoundUseCase = new RenameSoundUseCase(repository);
+        var toggleSoundUseCase = new ToggleSoundUseCase(repository);
 
         var viewModel = new MainWindowViewModel(
             listVisibleSoundboardsUseCase,
@@ -63,7 +65,8 @@ internal static class DemoBootstrapper
             playSoundUseCase,
             playSoundByHotkeyUseCase,
             renameSoundboardUseCase,
-            renameSoundUseCase);
+            renameSoundUseCase,
+            toggleSoundUseCase);
 
         viewModel.Load();
         return viewModel;

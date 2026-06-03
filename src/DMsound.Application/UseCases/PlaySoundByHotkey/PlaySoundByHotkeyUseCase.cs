@@ -27,6 +27,11 @@ public sealed class PlaySoundByHotkeyUseCase
             return false;
         }
 
+        if (!sound.IsEnabled)
+        {
+            return false;
+        }
+
         _playbackService.Play(sound.ModifiedFilePath, muteMicDuringPlayback: true);
         return true;
     }
